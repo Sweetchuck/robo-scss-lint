@@ -1,0 +1,34 @@
+{
+    "name": "cheppers/robo-scss-lint",
+    "description": "Robo task wrapper for scss-lint",
+    "license": "GPL-2.0+",
+    "version": "0.0.1",
+    "config": {
+        "bin-dir": "bin"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "cheppers/asset-jar": "^0.0",
+        "consolidation/robo": "dev-master#628f807dc6e321ba858cadc00eecc6a40a99efa9"
+    },
+    "require-dev": {
+        "codeception/codeception": "^2.2",
+        "squizlabs/php_codesniffer": "2.6.2",
+        "cheppers/git-hooks": "^0.0.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cheppers\\Robo\\Task\\ScssLint\\": "src/"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@deploy-git-hooks"
+        ],
+        "post-update-cmd": [
+            "@deploy-git-hooks"
+        ],
+        "deploy-git-hooks": "\\Cheppers\\GitHooks\\Main::deploy"
+    }
+}

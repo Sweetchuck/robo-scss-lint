@@ -18,6 +18,8 @@ before_install:
   - 'which phpdbg && phpenv config-rm xdebug.ini || true'
 
 install:
+  - 'gem install bundler'
+  - 'bundle check || bundle install'
   - 'composer install'
 
 script:

@@ -5,4 +5,4 @@
 [![Coverage Status](https://coveralls.io/repos/github/Cheppers/robo-scss-lint/badge.svg?branch=master)](https://coveralls.io/github/Cheppers/robo-scss-lint?branch=master)
 
 
-@todo
+Bridge between [Robo](http://robo.li) and [scss-lint](https://rubygems.org/gems/scss_lint)

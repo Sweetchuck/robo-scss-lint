@@ -279,7 +279,14 @@ class TaskScssLintRun extends BaseTask implements AssetJarAwareInterface
      * Specify how to display lints.
      *
      * @param string $value
-     *   Formatter identifier.
+     *   Formatter identifier. By default the following formatters are supported:
+     *   - CleanFiles
+     *   - Config
+     *   - Default
+     *   - Files
+     *   - JSON
+     *   - Stats
+     *   - TAP
      *
      * @return $this
      */
@@ -456,9 +463,7 @@ class TaskScssLintRun extends BaseTask implements AssetJarAwareInterface
             $report = ($this->exitCode === static::EXIT_CODE_NO_FILES ? [] : json_decode($process->getOutput(), true));
 
             $write_output = false;
-            $this
-                ->getAssetJar()
-                ->setValue($report_parents, $report);
+            $this->setAssetJarValue('report', $report);
         }
 
         if ($write_output) {

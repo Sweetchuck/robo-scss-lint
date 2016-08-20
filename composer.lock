@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1a46975f3c9a8e682d9b491de5f8138e",
-    "content-hash": "c4b9b3bdb1ade03307d97b14564d9a3f",
+    "hash": "4f2245e17b22f3eaa106dc2abf195f55",
+    "content-hash": "0e322e33802db793bd7df3facef72ac2",
     "packages": [
         {
             "name": "cheppers/asset-jar",

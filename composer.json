@@ -2,7 +2,6 @@
     "name": "cheppers/robo-scss-lint",
     "description": "Robo task wrapper for scss-lint",
     "license": "GPL-2.0+",
-    "version": "0.0.1",
     "config": {
         "bin-dir": "bin"
     },

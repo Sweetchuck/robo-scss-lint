@@ -394,6 +394,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
         \Helper\Dummy\Process::$exitCode = $exitCode;
         \Helper\Dummy\Process::$stdOutput = $withJar ? json_encode($stdOutput) : $stdOutput;
 
+        $task->setConfig(\Robo\Robo::config());
         $task->setLogger($this->container->get('logger'));
         $assetJar = null;
         if ($withJar) {
@@ -441,6 +442,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
         \Helper\Dummy\Process::$exitCode = $exitCode;
         \Helper\Dummy\Process::$stdOutput = $stdOutput;
 
+        $task->setConfig(\Robo\Robo::config());
         $task->setLogger($this->container->get('logger'));
         $assetJar = new \Cheppers\AssetJar\AssetJar();
         $task->setAssetJar($assetJar);

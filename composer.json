@@ -10,7 +10,7 @@
     "prefer-stable": true,
     "require": {
         "cheppers/asset-jar": "^0.0",
-        "consolidation/robo": "dev-master#628f807dc6e321ba858cadc00eecc6a40a99efa9"
+        "consolidation/robo": "1.0.0-RC1"
     },
     "require-dev": {
         "codeception/codeception": "^2.2",

@@ -108,7 +108,7 @@ class RoboFile extends \Robo\Tasks
     protected function getTaskCodecept()
     {
         $cmd_args = [];
-        if ($this->isXdebugAvailable()) {
+        if ($this->isPhpExtensionAvailable('xdebug')) {
             $cmd_pattern = '%s';
             $cmd_args[] = escapeshellcmd("{$this->binDir}/codecept");
         } else {
@@ -117,7 +117,7 @@ class RoboFile extends \Robo\Tasks
             $cmd_args[] = escapeshellarg("{$this->binDir}/codecept");
         }
 
-        $cmd_pattern .= ' --ansi --coverage --coverage-xml --coverage-html=html run';
+        $cmd_pattern .= ' --ansi --verbose --coverage --coverage-xml --coverage-html=html run';
 
         return $this
             ->taskExec(vsprintf($cmd_pattern, $cmd_args))
@@ -125,12 +125,20 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
+     * @param string $extension
+     *
      * @return bool
      */
-    protected function isXdebugAvailable()
+    protected function isPhpExtensionAvailable($extension)
     {
-        $command = sprintf('%s -m | grep xdebug', escapeshellcmd($this->phpExecutable));
+        $command = sprintf('%s -m', escapeshellcmd($this->phpExecutable));
 
-        return (new Process($command))->run() === 0;
+        $process = new Process($command);
+        $exitCode = $process->run();
+        if ($exitCode !== 0) {
+            throw new \RuntimeException('@todo');
+        }
+
+        return in_array($extension, explode("\n", $process->getOutput()));
     }
 }

@@ -9,6 +9,7 @@ use Symfony\Component\Process\Process;
 class RoboFile extends \Robo\Tasks
     // @codingStandardsIgnoreEnd
 {
+    use \Cheppers\Robo\Phpcs\Task\LoadTasks;
 
     /**
      * @var array
@@ -45,26 +46,30 @@ class RoboFile extends \Robo\Tasks
      */
     public function __construct()
     {
-        $this
-            ->initComposerInfo()
-            ->setContainer(\Robo\Robo::getContainer());
+        $this->initComposerInfo();
     }
 
     /**
      * Git "pre-commit" hook callback.
      *
-     * @return \Robo\Collection\Collection
+     * @return \Robo\Collection\CollectionBuilder
      */
     public function githookPreCommit()
     {
-        return $this
-            ->collection()
-            ->add($this->taskComposerValidate(), 'lint.composer.lock')
-            ->add($this->getTaskCodecept(), 'codecept');
+        /** @var \Robo\Collection\CollectionBuilder $cb */
+        $cb = $this->collectionBuilder();
+
+        return $cb->addTaskList([
+            'lint.composer.lock' => $this->taskComposerValidate(),
+            'lint.phpcs' => $this->getTaskPhpcsLint(),
+            'codecept' => $this->getTaskCodecept(),
+        ]);
     }
 
     /**
      * Run the Robo unit tests.
+     *
+     * @return \Robo\Contract\TaskInterface
      */
     public function test()
     {
@@ -74,13 +79,17 @@ class RoboFile extends \Robo\Tasks
     /**
      * Run code style checkers.
      *
-     * @return \Robo\Collection\Collection
+     * @return \Robo\Collection\CollectionBuilder
      */
     public function lint()
     {
-        return $this
-            ->collection()
-            ->add($this->taskComposerValidate(), 'lint.composer.lock');
+        /** @var \Robo\Collection\CollectionBuilder $cb */
+        $cb = $this->collectionBuilder();
+
+        return $cb->addTaskList([
+            'lint.composer.lock' => $this->taskComposerValidate(),
+            'lint.phpcs' => $this->getTaskPhpcsLint(),
+        ]);
     }
 
     /**
@@ -100,6 +109,29 @@ class RoboFile extends \Robo\Tasks
         }
 
         return $this;
+    }
+
+    /**
+     * @return \Cheppers\Robo\Phpcs\Task\TaskPhpcsLint
+     */
+    protected function getTaskPhpcsLint()
+    {
+        return $this->taskPhpcsLint([
+            'colors' => 'always',
+            'standard' => 'PSR2',
+            'reports' => [
+                'full' => null,
+                'checkstyle' => 'tests/_output/checkstyle/phpcs-psr2.xml',
+            ],
+            'files' => [
+                'src/',
+                'tests/_data/RoboFile.php',
+                'tests/_support/Helper/',
+                'tests/acceptance/',
+                'tests/unit/',
+                'RoboFile.php',
+            ],
+        ]);
     }
 
     /**

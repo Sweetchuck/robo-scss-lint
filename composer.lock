@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "0a9d919ed37842b44119600fbacd3c3d",
-    "content-hash": "2381195189688fd4e90d3332c2059451",
+    "hash": "f822dedaac8b6064ca2317d144f8fab8",
+    "content-hash": "7ea963a6e61ae050bdc501aa18a66986",
     "packages": [
         {
             "name": "cheppers/asset-jar",
@@ -187,16 +187,16 @@
         },
         {
             "name": "consolidation/robo",
-            "version": "1.0.0-RC1",
+            "version": "1.0.0-RC2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/consolidation-org/Robo.git",
-                "reference": "f82b67307ecc6e96eeb022b1415d5ae9f024b061"
+                "reference": "abdae8e8e6d0872df9b02031c6d2f1b7364f3113"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/consolidation-org/Robo/zipball/f82b67307ecc6e96eeb022b1415d5ae9f024b061",
-                "reference": "f82b67307ecc6e96eeb022b1415d5ae9f024b061",
+                "url": "https://api.github.com/repos/consolidation-org/Robo/zipball/abdae8e8e6d0872df9b02031c6d2f1b7364f3113",
+                "reference": "abdae8e8e6d0872df9b02031c6d2f1b7364f3113",
                 "shasum": ""
             },
             "require": {
@@ -257,7 +257,7 @@
                 }
             ],
             "description": "Modern task runner",
-            "time": "2016-08-04 22:12:32"
+            "time": "2016-08-29 20:03:54"
         },
         {
             "name": "container-interop/container-interop",

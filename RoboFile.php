@@ -45,26 +45,29 @@ class RoboFile extends \Robo\Tasks
      */
     public function __construct()
     {
-        $this
-            ->initComposerInfo()
-            ->setContainer(\Robo\Robo::getContainer());
+        $this->initComposerInfo();
     }
 
     /**
      * Git "pre-commit" hook callback.
      *
-     * @return \Robo\Collection\Collection
+     * @return \Robo\Collection\CollectionBuilder
      */
     public function githookPreCommit()
     {
-        return $this
-            ->collection()
-            ->add($this->taskComposerValidate(), 'lint.composer.lock')
-            ->add($this->getTaskCodecept(), 'codecept');
+        /** @var \Robo\Collection\CollectionBuilder $cb */
+        $cb = $this->collectionBuilder();
+
+        return $cb->addTaskList([
+            'lint.composer.lock' => $this->taskComposerValidate(),
+            'codecept' => $this->getTaskCodecept(),
+        ]);
     }
 
     /**
      * Run the Robo unit tests.
+     *
+     * @return \Robo\Contract\TaskInterface
      */
     public function test()
     {
@@ -74,13 +77,16 @@ class RoboFile extends \Robo\Tasks
     /**
      * Run code style checkers.
      *
-     * @return \Robo\Collection\Collection
+     * @return \Robo\Collection\CollectionBuilder
      */
     public function lint()
     {
-        return $this
-            ->collection()
-            ->add($this->taskComposerValidate(), 'lint.composer.lock');
+        /** @var \Robo\Collection\CollectionBuilder $cb */
+        $cb = $this->collectionBuilder();
+
+        return $cb->addTaskList([
+            'lint.composer.lock' => $this->taskComposerValidate(),
+        ]);
     }
 
     /**

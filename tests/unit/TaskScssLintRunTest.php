@@ -1,7 +1,8 @@
 <?php
 
-use Cheppers\Robo\Task\ScssLint\TaskScssLintRun;
+use Cheppers\Robo\ScssLint\Task\Run as ScssLintRunner;
 use Codeception\Util\Stub;
+use Robo\Robo;
 
 /**
  * Class TaskScssLintRunTest.
@@ -11,8 +12,9 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
 {
     // @codingStandardsIgnoreEnd
 
-    use Cheppers\Robo\Task\ScssLint\LoadTasks;
+    use \Cheppers\Robo\ScssLint\Task\LoadTasks;
     use \Robo\TaskAccessor;
+    use \Robo\Common\BuilderAwareTrait;
 
     /**
      * @var \League\Container\Container
@@ -23,20 +25,9 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
     protected function _before()
     {
         // @codingStandardsIgnoreEnd
-        parent::_before();
-
         $this->container = new \League\Container\Container();
-        \Robo\Robo::setContainer($this->container);
-        \Robo\Runner::configureContainer($this->container, null, new \Helper\Dummy\Output());
-        $this->container->addServiceProvider(static::getScssLintServiceProvider());
-    }
-
-    /**
-     * @return \League\Container\Container
-     */
-    public function getContainer()
-    {
-        return $this->container;
+        Robo::setContainer($this->container);
+        Robo::configureContainer($this->container);
     }
 
     /**
@@ -186,16 +177,16 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
      */
     public function testBuildCommand($expected, array $options, array $paths)
     {
-        $task = new TaskScssLintRun($options, $paths);
+        $task = new ScssLintRunner($options, $paths);
         static::assertEquals($expected, $task->buildCommand());
     }
 
     public function testExitCodeConstants()
     {
-        static::assertEquals(0, TaskScssLintRun::EXIT_CODE_OK);
-        static::assertEquals(1, TaskScssLintRun::EXIT_CODE_WARNING);
-        static::assertEquals(2, TaskScssLintRun::EXIT_CODE_ERROR);
-        static::assertEquals(80, TaskScssLintRun::EXIT_CODE_NO_FILES);
+        static::assertEquals(0, ScssLintRunner::EXIT_CODE_OK);
+        static::assertEquals(1, ScssLintRunner::EXIT_CODE_WARNING);
+        static::assertEquals(2, ScssLintRunner::EXIT_CODE_ERROR);
+        static::assertEquals(80, ScssLintRunner::EXIT_CODE_NO_FILES);
     }
 
     /**
@@ -205,124 +196,124 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
     {
         return [
             'never-ok' => [
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
                 [
                     'failOn' => 'never',
                     'failOnNoFiles' => true,
                 ],
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
             ],
             'never-warning' => [
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
                 [
                     'failOn' => 'never',
                     'failOnNoFiles' => true,
                 ],
-                TaskScssLintRun::EXIT_CODE_WARNING,
+                ScssLintRunner::EXIT_CODE_WARNING,
             ],
             'never-error' => [
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
                 [
                     'failOn' => 'never',
                     'failOnNoFiles' => true,
                 ],
-                TaskScssLintRun::EXIT_CODE_ERROR,
+                ScssLintRunner::EXIT_CODE_ERROR,
             ],
             'never-no-files-false' => [
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
                 [
                     'failOn' => 'never',
                     'failOnNoFiles' => false,
                 ],
-                TaskScssLintRun::EXIT_CODE_NO_FILES,
+                ScssLintRunner::EXIT_CODE_NO_FILES,
             ],
             'never-no-files-true' => [
-                TaskScssLintRun::EXIT_CODE_NO_FILES,
+                ScssLintRunner::EXIT_CODE_NO_FILES,
                 [
                     'failOn' => 'never',
                     'failOnNoFiles' => true,
                 ],
-                TaskScssLintRun::EXIT_CODE_NO_FILES,
+                ScssLintRunner::EXIT_CODE_NO_FILES,
             ],
             'warning-ok' => [
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
                 [
                     'failOn' => 'warning',
                     'failOnNoFiles' => false,
                 ],
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
             ],
             'warning-warning' => [
-                TaskScssLintRun::EXIT_CODE_WARNING,
+                ScssLintRunner::EXIT_CODE_WARNING,
                 [
                     'failOn' => 'warning',
                     'failOnNoFiles' => false,
                 ],
-                TaskScssLintRun::EXIT_CODE_WARNING,
+                ScssLintRunner::EXIT_CODE_WARNING,
             ],
             'warning-error' => [
-                TaskScssLintRun::EXIT_CODE_ERROR,
+                ScssLintRunner::EXIT_CODE_ERROR,
                 [
                     'failOn' => 'warning',
                     'failOnNoFiles' => false,
                 ],
-                TaskScssLintRun::EXIT_CODE_ERROR,
+                ScssLintRunner::EXIT_CODE_ERROR,
             ],
             'warning-no-files-false' => [
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
                 [
                     'failOn' => 'warning',
                     'failOnNoFiles' => false,
                 ],
-                TaskScssLintRun::EXIT_CODE_NO_FILES,
+                ScssLintRunner::EXIT_CODE_NO_FILES,
             ],
             'warning-no-files-true' => [
-                TaskScssLintRun::EXIT_CODE_NO_FILES,
+                ScssLintRunner::EXIT_CODE_NO_FILES,
                 [
                     'failOn' => 'warning',
                     'failOnNoFiles' => true,
                 ],
-                TaskScssLintRun::EXIT_CODE_NO_FILES,
+                ScssLintRunner::EXIT_CODE_NO_FILES,
             ],
             'error-ok' => [
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
                 [
                     'failOn' => 'error',
                     'failOnNoFiles' => false,
                 ],
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
             ],
             'error-warning' => [
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
                 [
                     'failOn' => 'error',
                     'failOnNoFiles' => false,
                 ],
-                TaskScssLintRun::EXIT_CODE_WARNING,
+                ScssLintRunner::EXIT_CODE_WARNING,
             ],
             'error-error' => [
-                TaskScssLintRun::EXIT_CODE_ERROR,
+                ScssLintRunner::EXIT_CODE_ERROR,
                 [
                     'failOn' => 'error',
                     'failOnNoFiles' => false,
                 ],
-                TaskScssLintRun::EXIT_CODE_ERROR,
+                ScssLintRunner::EXIT_CODE_ERROR,
             ],
             'error-no-files-false' => [
-                TaskScssLintRun::EXIT_CODE_OK,
+                ScssLintRunner::EXIT_CODE_OK,
                 [
                     'failOn' => 'error',
                     'failOnNoFiles' => false,
                 ],
-                TaskScssLintRun::EXIT_CODE_NO_FILES,
+                ScssLintRunner::EXIT_CODE_NO_FILES,
             ],
             'error-no-files-true' => [
-                TaskScssLintRun::EXIT_CODE_NO_FILES,
+                ScssLintRunner::EXIT_CODE_NO_FILES,
                 [
                     'failOn' => 'error',
                     'failOnNoFiles' => true,
                 ],
-                TaskScssLintRun::EXIT_CODE_NO_FILES,
+                ScssLintRunner::EXIT_CODE_NO_FILES,
             ],
         ];
     }
@@ -336,9 +327,9 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
      */
     public function testGetTaskExitCode($expected, $options, $exitCode)
     {
-        /** @var TaskScssLintRun $task */
+        /** @var ScssLintRunner $task */
         $task = Stub::construct(
-            TaskScssLintRun::class,
+            ScssLintRunner::class,
             [$options, []],
             ['exitCode' => $exitCode]
         );
@@ -382,26 +373,26 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
             'format' => 'JSON',
         ];
 
-        /** @var TaskScssLintRun $task */
+        /** @var ScssLintRunner $task */
         $task = Stub::construct(
-            TaskScssLintRun::class,
+            ScssLintRunner::class,
             [$options, []],
             [
                 'processClass' => \Helper\Dummy\Process::class,
             ]
         );
 
+        $output = new \Helper\Dummy\Output();
         \Helper\Dummy\Process::$exitCode = $exitCode;
         \Helper\Dummy\Process::$stdOutput = $withJar ? json_encode($stdOutput) : $stdOutput;
 
-        $task->setConfig(\Robo\Robo::config());
         $task->setLogger($this->container->get('logger'));
+        $task->setOutput($output);
         $assetJar = null;
         if ($withJar) {
             $assetJar = new \Cheppers\AssetJar\AssetJar();
             $task->setAssetJar($assetJar);
         }
-
 
         $result = $task->run();
 
@@ -412,11 +403,17 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
         );
 
         if ($withJar) {
-            static::assertEquals($stdOutput, $assetJar->getValue(['scssLintRun', 'report']));
+            static::assertEquals(
+                $stdOutput,
+                $assetJar->getValue(['scssLintRun', 'report']),
+                'Output equals'
+            );
         } else {
-            /** @var \Helper\Dummy\Output $output */
-            $output = $this->container->get('output');
-            static::assertContains($stdOutput, $output->output);
+            static::assertContains(
+                $stdOutput,
+                $output->output,
+                'Output contains'
+            );
         }
     }
 
@@ -430,9 +427,9 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
             'format' => 'JSON',
         ];
 
-        /** @var TaskScssLintRun $task */
+        /** @var ScssLintRunner $task */
         $task = Stub::construct(
-            TaskScssLintRun::class,
+            ScssLintRunner::class,
             [$options, []],
             [
                 'processClass' => \Helper\Dummy\Process::class,
@@ -456,11 +453,5 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
         );
 
         static::assertEquals(['foo' => 'bar'], $assetJar->getValue(['scssLintRun', 'report']));
-    }
-
-    public function testContainerInstance()
-    {
-        $task = $this->taskScssLintRun();
-        static::assertEquals(0, $task->getTaskExitCode());
     }
 }

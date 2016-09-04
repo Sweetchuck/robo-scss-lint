@@ -9,7 +9,7 @@
     "prefer-stable": true,
     "require": {
         "cheppers/asset-jar": "^0.0",
-        "consolidation/robo": "1.0.0-RC1"
+        "consolidation/robo": "1.0.0-RC2"
     },
     "require-dev": {
         "codeception/codeception": "^2.2",
@@ -18,7 +18,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Cheppers\\Robo\\Task\\ScssLint\\": "src/"
+            "Cheppers\\Robo\\ScssLint\\": "src/"
         }
     },
     "scripts": {

@@ -1,11 +1,12 @@
 <?php
 
+// @codingStandardsIgnoreStart
 /**
  * Class RoboFile.
  */
 class RoboFile extends \Robo\Tasks
-    // @codingStandardsIgnoreEnd
 {
+    // @codingStandardsIgnoreEnd
     use \Cheppers\Robo\ScssLint\Task\LoadTasks;
 
     /**

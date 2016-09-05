@@ -3,8 +3,6 @@
  * @var \Codeception\Scenario $scenario
  */
 
-$dataDir = rtrim(codecept_data_dir(), '/');
-
 $i = new AcceptanceTester($scenario);
 $i->wantTo('Run TaskScssLintRun Robo task');
 $i

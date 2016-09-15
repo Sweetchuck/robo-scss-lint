@@ -21,7 +21,7 @@ trait LoadTasks
      * @return \Cheppers\Robo\ScssLint\Task\Run A lint runner task instance.
      *   A lint runner task instance.
      */
-    public function taskScssLintRun(array $options = [], array $paths = [])
+    protected function taskScssLintRun(array $options = [], array $paths = [])
     {
         return $this->task(Run::class, $options, $paths);
     }

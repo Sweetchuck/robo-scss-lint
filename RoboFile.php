@@ -2,6 +2,7 @@
 
 // @codingStandardsIgnoreStart
 use Symfony\Component\Process\Process;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class RoboFile.
@@ -15,6 +16,11 @@ class RoboFile extends \Robo\Tasks
      * @var array
      */
     protected $composerInfo = [];
+
+    /**
+     * @var array
+     */
+    protected $codeceptionInfo = [];
 
     /**
      * @var string
@@ -61,19 +67,22 @@ class RoboFile extends \Robo\Tasks
 
         return $cb->addTaskList([
             'lint.composer.lock' => $this->taskComposerValidate(),
-            'lint.phpcs' => $this->getTaskPhpcsLint(),
+            'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
             'codecept' => $this->getTaskCodecept(),
         ]);
     }
 
     /**
      * Run the Robo unit tests.
-     *
-     * @return \Robo\Contract\TaskInterface
      */
     public function test()
     {
-        return $this->getTaskCodecept();
+        /** @var \Robo\Collection\CollectionBuilder $cb */
+        $cb = $this->collectionBuilder();
+
+        return $cb->addTaskList([
+            'codecept' => $this->getTaskCodecept(),
+        ]);
     }
 
     /**
@@ -85,11 +94,12 @@ class RoboFile extends \Robo\Tasks
     {
         /** @var \Robo\Collection\CollectionBuilder $cb */
         $cb = $this->collectionBuilder();
-
-        return $cb->addTaskList([
+        $cb->addTaskList([
             'lint.composer.lock' => $this->taskComposerValidate(),
-            'lint.phpcs' => $this->getTaskPhpcsLint(),
+            'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
         ]);
+
+        return $cb;
     }
 
     /**
@@ -112,6 +122,28 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
+     * @return $this
+     */
+    protected function initCodeceptionInfo()
+    {
+        if ($this->codeceptionInfo) {
+            return $this;
+        }
+
+        if (is_readable('codeception.yml')) {
+            $this->codeceptionInfo = Yaml::parse(file_get_contents('codeception.yml'));
+        } else {
+            $this->codeceptionInfo = [
+                'paths' => [
+                    'log' => 'tests/_output',
+                ],
+            ];
+        }
+
+        return $this;
+    }
+
+    /**
      * @return \Cheppers\Robo\Phpcs\Task\TaskPhpcsLint
      */
     protected function getTaskPhpcsLint()
@@ -121,7 +153,6 @@ class RoboFile extends \Robo\Tasks
             'standard' => 'PSR2',
             'reports' => [
                 'full' => null,
-                'checkstyle' => 'tests/_output/checkstyle/phpcs-psr2.xml',
             ],
             'files' => [
                 'src/',
@@ -135,10 +166,12 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Robo\Task\Base\Exec
+     * @return \Robo\Collection\CollectionBuilder
      */
     protected function getTaskCodecept()
     {
+        $this->initCodeceptionInfo();
+
         $cmd_args = [];
         if ($this->isPhpExtensionAvailable('xdebug')) {
             $cmd_pattern = '%s';
@@ -149,11 +182,30 @@ class RoboFile extends \Robo\Tasks
             $cmd_args[] = escapeshellarg("{$this->binDir}/codecept");
         }
 
-        $cmd_pattern .= ' --ansi --verbose --coverage --coverage-xml --coverage-html=html run';
+        $cmd_pattern .= ' --ansi';
+        $cmd_pattern .= ' --verbose';
 
-        return $this
-            ->taskExec(vsprintf($cmd_pattern, $cmd_args))
-            ->printed(false);
+        $cmd_pattern .= ' --coverage=%s';
+        $cmd_args[] = escapeshellarg('coverage/coverage.serialized');
+
+        $cmd_pattern .= ' --coverage-xml=%s';
+        $cmd_args[] = escapeshellarg('coverage/coverage.xml');
+
+        $cmd_pattern .= ' --coverage-html=%s';
+        $cmd_args[] = escapeshellarg('coverage/html');
+
+        $cmd_pattern .= ' run';
+
+        $reportsDir = $this->codeceptionInfo['paths']['log'];
+
+        /** @var \Robo\Collection\CollectionBuilder $cb */
+        $cb = $this->collectionBuilder();
+        $cb->addTaskList([
+            'prepareCoverageDir' => $this->taskFilesystemStack()->mkdir("$reportsDir/coverage"),
+            'runCodeception' => $this->taskExec(vsprintf($cmd_pattern, $cmd_args)),
+        ]);
+
+        return $cb;
     }
 
     /**

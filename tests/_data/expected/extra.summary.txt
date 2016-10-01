@@ -1,0 +1,10 @@
+fixtures/invalid.scss
++-------------------------+-------------+
+| Source                  | Occurrences |
++-------------------------+-------------+
+| SpaceBeforeBrace        |           1 |
+| SpaceAfterPropertyColon |           1 |
+| SingleLinePerProperty   |           1 |
+| IdSelector              |           1 |
+| Indentation             |           1 |
++-------------------------+-------------+

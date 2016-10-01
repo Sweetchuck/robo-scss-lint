@@ -8,16 +8,18 @@ php:
   - '7.0'
 
 env:
-  - COMPOSER_NO_INTERACTION=1 COMPOSER_DISABLE_XDEBUG_WARN=1
+  - "COMPOSER_NO_INTERACTION=1 COMPOSER_DISABLE_XDEBUG_WARN=1 RUBY_VERSION=$(bundle platform --ruby | awk '{print $2}')"
 
 cache:
   directories:
     - '$HOME/.composer/cache'
+    - '$HOME/.rvm/rubies'
 
 before_install:
   - 'which phpdbg && phpenv config-rm xdebug.ini || true'
 
 install:
+  - 'rvm install "${RUBY_VERSION}"'
   - 'gem install bundler'
   - 'bundle check || bundle install'
   - 'composer install'

@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Task;
+namespace Cheppers\Robo\ScssLint;
 
 use League\Container\ContainerAwareInterface;
 use Robo\Contract\OutputAwareInterface;
@@ -10,7 +10,7 @@ use Robo\Contract\OutputAwareInterface;
  *
  * @package Cheppers\Robo\ScssLint\Task
  */
-trait LoadTasks
+trait ScssLintTaskLoader
 {
 
     /**
@@ -21,13 +21,13 @@ trait LoadTasks
      * @param string[] $paths
      *   File paths.
      *
-     * @return \Cheppers\Robo\ScssLint\Task\Run A lint runner task instance.
+     * @return \Cheppers\Robo\ScssLint\Task\Run
      *   A lint runner task instance.
      */
     protected function taskScssLintRun(array $options = [], array $paths = [])
     {
         /** @var \Cheppers\Robo\ScssLint\Task\Run $task */
-        $task = $this->task(Run::class, $options, $paths);
+        $task = $this->task(Task\Run::class, $options, $paths);
         if ($this instanceof ContainerAwareInterface) {
             $task->setContainer($this->getContainer());
         }

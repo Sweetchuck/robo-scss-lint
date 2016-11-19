@@ -164,20 +164,20 @@ class ReportWrapperTest extends \Codeception\Test\Unit
     }
 
     /**
-     * @dataProvider casesReports
-     *
      * @param array $expected
      * @param array $report
      * @param array $filesStats
+     *
+     * @dataProvider casesReports
      */
     public function testAll(array $expected, array $report, array $filesStats)
     {
         $rw = new ReportWrapper($report);
 
-        $this->assertEquals($expected['countFiles'], $rw->countFiles());
-        $this->assertEquals($expected['numOfErrors'], $rw->numOfErrors());
-        $this->assertEquals($expected['numOfWarnings'], $rw->numOfWarnings());
-        $this->assertEquals($expected['highestSeverity'], $rw->highestSeverity());
+        $this->tester->assertEquals($expected['countFiles'], $rw->countFiles());
+        $this->tester->assertEquals($expected['numOfErrors'], $rw->numOfErrors());
+        $this->tester->assertEquals($expected['numOfWarnings'], $rw->numOfWarnings());
+        $this->tester->assertEquals($expected['highestSeverity'], $rw->highestSeverity());
 
         /**
          * @var string $filePath
@@ -185,11 +185,11 @@ class ReportWrapperTest extends \Codeception\Test\Unit
          */
         foreach ($rw->yieldFiles() as $filePath => $fw) {
             $fileStats = $filesStats[$filePath];
-            $this->assertEquals($filePath, $fw->filePath());
-            $this->assertEquals($fileStats['numOfErrors'], $fw->numOfErrors());
-            $this->assertEquals($fileStats['numOfWarnings'], $fw->numOfWarnings());
-            $this->assertEquals($fileStats['highestSeverity'], $fw->highestSeverity());
-            $this->assertEquals($fileStats['stats'], $fw->stats());
+            $this->tester->assertEquals($filePath, $fw->filePath());
+            $this->tester->assertEquals($fileStats['numOfErrors'], $fw->numOfErrors());
+            $this->tester->assertEquals($fileStats['numOfWarnings'], $fw->numOfWarnings());
+            $this->tester->assertEquals($fileStats['highestSeverity'], $fw->highestSeverity());
+            $this->tester->assertEquals($fileStats['stats'], $fw->stats());
 
             /**
              * @var int $i
@@ -197,12 +197,173 @@ class ReportWrapperTest extends \Codeception\Test\Unit
              */
             foreach ($fw->yieldFailures() as $i => $failureWrapper) {
                 $failure = $report[$filePath][$i];
-                $this->assertEquals($failure['severity'], $failureWrapper->severity());
-                $this->assertEquals($failure['linter'], $failureWrapper->source());
-                $this->assertEquals($failure['line'], $failureWrapper->line());
-                $this->assertEquals($failure['column'], $failureWrapper->column());
-                $this->assertEquals($failure['reason'], $failureWrapper->message());
+                $this->tester->assertEquals($failure['severity'], $failureWrapper->severity());
+                $this->tester->assertEquals($failure['linter'], $failureWrapper->source());
+                $this->tester->assertEquals($failure['line'], $failureWrapper->line());
+                $this->tester->assertEquals($failure['column'], $failureWrapper->column());
+                $this->tester->assertEquals($failure['reason'], $failureWrapper->message());
             }
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function casesFailureComparer()
+    {
+        return [
+            'equal' => [
+                0,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'line 1 0' => [
+                -1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 1,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'line 0 1' => [
+                1,
+                [
+                    'line' => 1,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'column 1 0' => [
+                -1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 1,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'column 0 1' => [
+                1,
+                [
+                    'line' => 0,
+                    'column' => 1,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'length 1 0' => [
+                -1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 1,
+                    'reason' => 'a',
+                ],
+            ],
+            'length 0 1' => [
+                1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 1,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'reason a b' => [
+                -1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'b',
+                ],
+            ],
+            'reason b a' => [
+                1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'b',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param int $expected
+     * @param array $a
+     * @param array $b
+     *
+     * @dataProvider casesFailureComparer
+     */
+    public function testFailureComparer($expected, array $a, array $b)
+    {
+        $rw = new ReportWrapper([]);
+        $class = new ReflectionClass(ReportWrapper::class);
+        $failureComparer = $class->getMethod('failureComparer');
+        $failureComparer->setAccessible(true);
+
+        $this->tester->assertEquals($expected, $failureComparer->invoke($rw, $a, $b));
     }
 }

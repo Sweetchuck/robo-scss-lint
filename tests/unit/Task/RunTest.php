@@ -13,11 +13,6 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
 {
     // @codingStandardsIgnoreEnd
 
-    use \Cheppers\Robo\ScssLint\Task\LoadTasks;
-    use \League\Container\ContainerAwareTrait;
-    use \Robo\TaskAccessor;
-    use \Robo\Common\BuilderAwareTrait;
-
     /**
      * @param $name
      *
@@ -33,17 +28,18 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
     }
 
     /**
-     * @var \League\Container\Container
+     * @var \UnitTester
      */
-    protected $container = null;
+    protected $tester;
 
-    // @codingStandardsIgnoreStart
-    protected function _before()
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp()
     {
-        // @codingStandardsIgnoreEnd
-        $this->container = new \League\Container\Container();
-        Robo::setContainer($this->container);
-        Robo::configureContainer($this->container);
+        parent::setUp();
+
+        \Helper\Dummy\Process::reset();
     }
 
     public function testGetSetLintReporters()
@@ -59,7 +55,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
             ->addLintReporter('cKey', 'cValue')
             ->removeLintReporter('bKey');
 
-        $this->assertEquals(
+        $this->tester->assertEquals(
             [
                 'aKey' => 'aValue',
                 'cKey' => 'cValue',
@@ -216,15 +212,15 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
     public function testBuildCommand($expected, array $options, array $paths)
     {
         $task = new Task($options, $paths);
-        static::assertEquals($expected, $task->buildCommand());
+        $this->tester->assertEquals($expected, $task->buildCommand());
     }
 
     public function testExitCodeConstants()
     {
-        static::assertEquals(0, Task::EXIT_CODE_OK);
-        static::assertEquals(1, Task::EXIT_CODE_WARNING);
-        static::assertEquals(2, Task::EXIT_CODE_ERROR);
-        static::assertEquals(80, Task::EXIT_CODE_NO_FILES);
+        $this->tester->assertEquals(0, Task::EXIT_CODE_OK);
+        $this->tester->assertEquals(1, Task::EXIT_CODE_WARNING);
+        $this->tester->assertEquals(2, Task::EXIT_CODE_ERROR);
+        $this->tester->assertEquals(80, Task::EXIT_CODE_NO_FILES);
     }
 
     /**
@@ -232,129 +228,6 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
      */
     public function casesGetTaskExitCode()
     {
-        $old = [
-            'never-ok' => [
-                Task::EXIT_CODE_OK,
-                [
-                    'failOn' => 'never',
-                    'failOnNoFiles' => true,
-                ],
-                Task::EXIT_CODE_OK,
-            ],
-            'never-warning' => [
-                Task::EXIT_CODE_OK,
-                [
-                    'failOn' => 'never',
-                    'failOnNoFiles' => true,
-                ],
-                Task::EXIT_CODE_WARNING,
-            ],
-            'never-error' => [
-                Task::EXIT_CODE_OK,
-                [
-                    'failOn' => 'never',
-                    'failOnNoFiles' => true,
-                ],
-                Task::EXIT_CODE_ERROR,
-            ],
-            'never-no-files-false' => [
-                Task::EXIT_CODE_OK,
-                [
-                    'failOn' => 'never',
-                    'failOnNoFiles' => false,
-                ],
-                Task::EXIT_CODE_NO_FILES,
-            ],
-            'never-no-files-true' => [
-                Task::EXIT_CODE_NO_FILES,
-                [
-                    'failOn' => 'never',
-                    'failOnNoFiles' => true,
-                ],
-                Task::EXIT_CODE_NO_FILES,
-            ],
-            'warning-ok' => [
-                Task::EXIT_CODE_OK,
-                [
-                    'failOn' => 'warning',
-                    'failOnNoFiles' => false,
-                ],
-                Task::EXIT_CODE_OK,
-            ],
-            'warning-warning' => [
-                Task::EXIT_CODE_WARNING,
-                [
-                    'failOn' => 'warning',
-                    'failOnNoFiles' => false,
-                ],
-                Task::EXIT_CODE_WARNING,
-            ],
-            'warning-error' => [
-                Task::EXIT_CODE_ERROR,
-                [
-                    'failOn' => 'warning',
-                    'failOnNoFiles' => false,
-                ],
-                Task::EXIT_CODE_ERROR,
-            ],
-            'warning-no-files-false' => [
-                Task::EXIT_CODE_OK,
-                [
-                    'failOn' => 'warning',
-                    'failOnNoFiles' => false,
-                ],
-                Task::EXIT_CODE_NO_FILES,
-            ],
-            'warning-no-files-true' => [
-                Task::EXIT_CODE_NO_FILES,
-                [
-                    'failOn' => 'warning',
-                    'failOnNoFiles' => true,
-                ],
-                Task::EXIT_CODE_NO_FILES,
-            ],
-            'error-ok' => [
-                Task::EXIT_CODE_OK,
-                [
-                    'failOn' => 'error',
-                    'failOnNoFiles' => false,
-                ],
-                Task::EXIT_CODE_OK,
-            ],
-            'error-warning' => [
-                Task::EXIT_CODE_OK,
-                [
-                    'failOn' => 'error',
-                    'failOnNoFiles' => false,
-                ],
-                Task::EXIT_CODE_WARNING,
-            ],
-            'error-error' => [
-                Task::EXIT_CODE_ERROR,
-                [
-                    'failOn' => 'error',
-                    'failOnNoFiles' => false,
-                ],
-                Task::EXIT_CODE_ERROR,
-            ],
-            'error-no-files-false' => [
-                Task::EXIT_CODE_OK,
-                [
-                    'failOn' => 'error',
-                    'failOnNoFiles' => false,
-                ],
-                Task::EXIT_CODE_NO_FILES,
-            ],
-            'error-no-files-true' => [
-                Task::EXIT_CODE_NO_FILES,
-                [
-                    'failOn' => 'error',
-                    'failOnNoFiles' => true,
-                ],
-                Task::EXIT_CODE_NO_FILES,
-            ],
-        ];
-
         $o = Task::EXIT_CODE_OK;
         $w = Task::EXIT_CODE_WARNING;
         $e = Task::EXIT_CODE_ERROR;
@@ -434,8 +307,6 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
     }
 
     /**
-     * @dataProvider casesGetTaskExitCode
-     *
      * @param int $expected
      * @param string $failOn
      * @param bool $failOnNoFiles
@@ -443,18 +314,18 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
      * @param int $numOfWarnings
      * @param int $exitCode
      *
-     * @internal param array $options
+     * @dataProvider casesGetTaskExitCode
      */
     public function testGetTaskExitCode($expected, $failOn, $failOnNoFiles, $numOfErrors, $numOfWarnings, $exitCode)
     {
-        /** @var Task $eslint */
+        /** @var Task $task */
         $task = Stub::construct(
             Task::class,
             [['failOn' => $failOn, 'failOnNoFiles' => $failOnNoFiles]],
             ['exitCode' => $exitCode]
         );
 
-        static::assertEquals(
+        $this->tester->assertEquals(
             $expected,
             static::getMethod('getTaskExitCode')->invokeArgs($task, [$numOfErrors, $numOfWarnings])
         );
@@ -465,76 +336,94 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
      */
     public function casesRun()
     {
-        return [
-            'withoutJar - success' => [
-                0,
-                [],
-                false,
-            ],
-            'withoutJar - warning' => [
-                1,
-                [
-                    'a.scss' => [
-                        [
-                            'severity' => 'warning',
-                        ],
-                    ],
-                ],
-                false,
-            ],
-            'withoutJar - error' => [
-                2,
-                [
-                    'a.scss' => [
-                        [
-                            'severity' => 'error',
-                        ],
-                    ]
-                ],
-                false,
-            ],
-            'withJar - success' => [
-                0,
-                [],
-                true,
-            ],
-            'withJar - warning' => [
-                1,
-                [
-                    'a.scss' => [
-                        [
-                            'severity' => 'warning',
-                        ],
-                    ],
-                ],
-                true,
-            ],
-            'withJar - error' => [
-                2,
-                [
-                    'a.scss' => [
-                        [
-                            'severity' => 'error',
-                        ],
-                    ],
-                ],
-                true,
-            ],
+        $reportBase = [];
+
+        $messageWarning = [
+            'line' => 1,
+            'column' => 2,
+            'length' => 3,
+            'severity' => 'warning',
+            'reason' => 'R1',
+            'linter' => 'S1',
         ];
+
+        $messageError = [
+            'line' => 3,
+            'column' => 4,
+            'length' => 5,
+            'severity' => 'error',
+            'reason' => 'R2',
+            'linter' => 'S2',
+        ];
+
+        $label_pattern = '%d; failOn: %s; E: %d; W: %d; exitCode: %d; withJar: %s;';
+        $cases = [];
+
+        $combinations = [
+            ['e' => true, 'w' => true, 'f' => 'never', 'c' => 0],
+            ['e' => true, 'w' => false, 'f' => 'never', 'c' => 0],
+            ['e' => false, 'w' => true, 'f' => 'never', 'c' => 0],
+            ['e' => false, 'w' => false, 'f' => 'never', 'c' => 0],
+
+            ['e' => true, 'w' => true, 'f' => 'warning', 'c' => 2],
+            ['e' => true, 'w' => false, 'f' => 'warning', 'c' => 2],
+            ['e' => false, 'w' => true, 'f' => 'warning', 'c' => 1],
+            ['e' => false, 'w' => false, 'f' => 'warning', 'c' => 0],
+
+            ['e' => true, 'w' => true, 'f' => 'error', 'c' => 2],
+            ['e' => true, 'w' => false, 'f' => 'error', 'c' => 2],
+            ['e' => false, 'w' => true, 'f' => 'error', 'c' => 0],
+            ['e' => false, 'w' => false, 'f' => 'error', 'c' => 0],
+        ];
+
+        $i = 0;
+        foreach ([true, false] as $withJar) {
+            $withJarStr = $withJar ? 'true' : 'false';
+            foreach ($combinations as $c) {
+                $i++;
+                $report = $reportBase;
+
+                if ($c['e']) {
+                    $report['a.scss'][] = $messageError;
+                }
+
+                if ($c['w']) {
+                    $report['a.scss'][] = $messageWarning;
+                }
+
+                $label = sprintf($label_pattern, $i, $c['f'], $c['e'], $c['w'], $c['c'], $withJarStr);
+                $cases[$label] = [
+                    $c['c'],
+                    [
+                        'failOn' => $c['f'],
+                    ],
+                    $withJar,
+                    json_encode($report)
+                ];
+            }
+        }
+
+        return $cases;
     }
 
     /**
      * This way cannot be tested those cases when the lint process failed.
      *
-     * @dataProvider casesRun
-     *
-     * @param int $expectedExitCode
-     * @param array $expectedReport
+     * @param int $exitCode
+     * @param array $options
      * @param bool $withJar
+     * @param bool $expectedStdOutput
+     *
+     * @dataProvider casesRun
      */
-    public function testRun($expectedExitCode, array $expectedReport, $withJar)
+    public function testRun($exitCode, $options, $withJar, $expectedStdOutput)
     {
-        $options = [
+        $container = \Robo\Robo::createDefaultContainer();
+        \Robo\Robo::setContainer($container);
+
+        $mainStdOutput = new \Helper\Dummy\Output();
+
+        $options += [
             'workingDirectory' => 'my-working-dir',
             'assetJarMapping' => ['report' => ['scssLintRun', 'report']],
             'format' => 'JSON',
@@ -542,7 +431,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
             'failOnNoFiles' => false,
         ];
 
-        /** @var Task $task */
+        /** @var \Cheppers\Robo\ScssLint\Task\Run $task */
         $task = Stub::construct(
             Task::class,
             [$options, []],
@@ -551,12 +440,16 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
             ]
         );
 
-        $output = new \Helper\Dummy\Output();
-        \Helper\Dummy\Process::$exitCode = $expectedExitCode;
-        \Helper\Dummy\Process::$stdOutput = json_encode($expectedReport);
+        $processIndex = count(\Helper\Dummy\Process::$instances);
 
-        $task->setLogger($this->container->get('logger'));
-        $task->setOutput($output);
+        \Helper\Dummy\Process::$prophecy[$processIndex] = [
+            'exitCode' => $exitCode,
+            'stdOutput' => $expectedStdOutput,
+        ];
+
+        $task->setLogger($container->get('logger'));
+        $task->setOutput($mainStdOutput);
+
         $assetJar = null;
         if ($withJar) {
             $assetJar = new \Cheppers\AssetJar\AssetJar();
@@ -565,84 +458,40 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
 
         $result = $task->run();
 
-        static::assertEquals($expectedExitCode, $result->getExitCode(), 'Exit code');
-        static::assertEquals(
+        $this->tester->assertEquals(
+            $exitCode,
+            $result->getExitCode(),
+            'Exit code'
+        );
+
+        $this->tester->assertEquals(
             $options['workingDirectory'],
-            \Helper\Dummy\Process::$instance->getWorkingDirectory(),
+            \Helper\Dummy\Process::$instances[$processIndex]->getWorkingDirectory(),
             'Working directory'
         );
 
         if ($withJar) {
             /** @var \Cheppers\Robo\ScssLint\LintReportWrapper\ReportWrapper $reportWrapper */
             $reportWrapper = $assetJar->getValue(['scssLintRun', 'report']);
-            static::assertEquals(
-                $expectedReport,
+            $this->tester->assertEquals(
+                json_decode($expectedStdOutput, true),
                 $reportWrapper->getReport(),
                 'Output equals with jar'
             );
         } else {
-            static::assertEquals(
-                $expectedReport,
-                json_decode($output->output, true),
-                'Output equals without jar'
+            $this->tester->assertContains(
+                $expectedStdOutput,
+                $mainStdOutput->output,
+                'Output contains'
             );
         }
     }
 
-    public function testRunFailed()
-    {
-        $exitCode = 2;
-        $report = [
-            'a.scss' => [
-                [
-                    'line' => 1,
-                    'column' => 2,
-                    'length' => 3,
-                    'severity' => 'error',
-                    'reason' => 'r1',
-                ],
-            ],
-        ];
-        $reportJson = json_encode($report);
-        $options = [
-            'workingDirectory' => 'my-working-dir',
-            'assetJarMapping' => ['report' => ['ScssLintRun', 'report']],
-            'format' => 'JSON',
-            'failOn' => 'warning',
-        ];
-
-        /** @var Task $task */
-        $task = Stub::construct(
-            Task::class,
-            [$options, []],
-            [
-                'processClass' => \Helper\Dummy\Process::class,
-            ]
-        );
-
-        \Helper\Dummy\Process::$exitCode = $exitCode;
-        \Helper\Dummy\Process::$stdOutput = $reportJson;
-
-        $task->setConfig(Robo::config());
-        $task->setLogger($this->container->get('logger'));
-        $assetJar = new \Cheppers\AssetJar\AssetJar();
-        $task->setAssetJar($assetJar);
-
-        $result = $task->run();
-
-        static::assertEquals($exitCode, $result->getExitCode());
-        static::assertEquals(
-            $options['workingDirectory'],
-            \Helper\Dummy\Process::$instance->getWorkingDirectory()
-        );
-
-        /** @var \Cheppers\Robo\ScssLint\LintReportWrapper\ReportWrapper $reportWrapper */
-        $reportWrapper = $assetJar->getValue(['ScssLintRun', 'report']);
-        static::assertEquals($report, $reportWrapper->getReport());
-    }
-
     public function testRunNativeAndExtraReporterConflict()
     {
+        $container = \Robo\Robo::createDefaultContainer();
+        \Robo\Robo::setContainer($container);
+
         $options = [
             'format' => 'stylish',
             'lintReporters' => [
@@ -655,12 +504,11 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
             Task::class,
             [$options, []],
             [
-                'container' => $this->getContainer(),
+                'container' => $container,
             ]
         );
 
-        $task->setConfig(Robo::config());
-        $task->setLogger($this->container->get('logger'));
+        $task->setLogger($container->get('logger'));
         $assetJar = new \Cheppers\AssetJar\AssetJar();
         $task->setAssetJar($assetJar);
 

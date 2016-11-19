@@ -1,6 +1,9 @@
 <?php
 
 // @codingStandardsIgnoreStart
+use Cheppers\LintReport\Reporter\BaseReporter;
+use Cheppers\LintReport\Reporter\CheckstyleReporter;
+use League\Container\ContainerInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
@@ -10,7 +13,8 @@ use Symfony\Component\Yaml\Yaml;
 class RoboFile extends \Robo\Tasks
     // @codingStandardsIgnoreEnd
 {
-    use \Cheppers\Robo\Phpcs\Task\LoadTasks;
+    use \Cheppers\Robo\Git\Task\LoadTasks;
+    use \Cheppers\Robo\Phpcs\LoadPhpcsTasks;
 
     /**
      * @var array
@@ -48,11 +52,41 @@ class RoboFile extends \Robo\Tasks
     protected $phpdbgExecutable = 'phpdbg';
 
     /**
+     * Allowed values: dev, git-hook, jenkins.
+     *
+     * @var string
+     */
+    protected $environment = '';
+
+    /**
      * RoboFile constructor.
      */
     public function __construct()
     {
+        putenv('COMPOSER_DISABLE_XDEBUG_WARN=1');
         $this->initComposerInfo();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setContainer(ContainerInterface $container)
+    {
+        BaseReporter::lintReportConfigureContainer($container);
+
+        return parent::setContainer($container);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getEnvironment()
+    {
+        if ($this->environment) {
+            return $this->environment;
+        }
+
+        return getenv('ROBO_PHPCS_ENVIRONMENT') ?: 'dev';
     }
 
     /**
@@ -62,14 +96,15 @@ class RoboFile extends \Robo\Tasks
      */
     public function githookPreCommit()
     {
-        /** @var \Robo\Collection\CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
+        $this->environment = 'git-hook';
 
-        return $cb->addTaskList([
-            'lint.composer.lock' => $this->taskComposerValidate(),
-            'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
-            'codecept' => $this->getTaskCodecept(),
-        ]);
+        return $this
+            ->collectionBuilder()
+            ->addTaskList([
+                'lint.composer.lock' => $this->taskComposerValidate(),
+                'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
+                'codecept' => $this->getTaskCodecept(),
+            ]);
     }
 
     /**
@@ -77,12 +112,7 @@ class RoboFile extends \Robo\Tasks
      */
     public function test()
     {
-        /** @var \Robo\Collection\CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
-
-        return $cb->addTaskList([
-            'codecept' => $this->getTaskCodecept(),
-        ]);
+        return $this->getTaskCodecept();
     }
 
     /**
@@ -92,14 +122,12 @@ class RoboFile extends \Robo\Tasks
      */
     public function lint()
     {
-        /** @var \Robo\Collection\CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
-        $cb->addTaskList([
-            'lint.composer.lock' => $this->taskComposerValidate(),
-            'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
-        ]);
-
-        return $cb;
+        return $this
+            ->collectionBuilder()
+            ->addTaskList([
+                'lint.composer.lock' => $this->taskComposerValidate(),
+                'lint.phpcs.psr2' => $this->getTaskPhpcsLint(),
+            ]);
     }
 
     /**
@@ -144,68 +172,121 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\Phpcs\Task\TaskPhpcsLint
-     */
-    protected function getTaskPhpcsLint()
-    {
-        return $this->taskPhpcsLint([
-            'colors' => 'always',
-            'standard' => 'PSR2',
-            'reports' => [
-                'full' => null,
-            ],
-            'files' => [
-                'src/',
-                'tests/_data/RoboFile.php',
-                'tests/_support/Helper/',
-                'tests/acceptance/',
-                'tests/unit/',
-                'RoboFile.php',
-            ],
-        ]);
-    }
-
-    /**
      * @return \Robo\Collection\CollectionBuilder
      */
     protected function getTaskCodecept()
     {
-        $this->initCodeceptionInfo();
+        $environment = $this->getEnvironment();
+        $withCoverage = $environment !== 'git-hook';
+        $withUnitReport = $environment !== 'git-hook';
+        $logDir = $this->getLogDir();
 
-        $cmd_args = [];
-        if ($this->isPhpExtensionAvailable('xdebug')) {
-            $cmd_pattern = '%s';
-            $cmd_args[] = escapeshellcmd("{$this->binDir}/codecept");
+        $cmdArgs = [];
+        if ($this->isPhpDbgAvailable() && !$this->isPhpExtensionAvailable('xdebug')) {
+            $cmdPattern = '%s -qrr %s';
+            $cmdArgs[] = escapeshellcmd($this->phpdbgExecutable);
+            $cmdArgs[] = escapeshellarg("{$this->binDir}/codecept");
         } else {
-            $cmd_pattern = '%s -qrr %s';
-            $cmd_args[] = escapeshellcmd($this->phpdbgExecutable);
-            $cmd_args[] = escapeshellarg("{$this->binDir}/codecept");
+            $cmdPattern = '%s';
+            $cmdArgs[] = escapeshellcmd("{$this->binDir}/codecept");
         }
 
-        $cmd_pattern .= ' --ansi';
-        $cmd_pattern .= ' --verbose';
+        $cmdPattern .= ' --ansi';
+        $cmdPattern .= ' --verbose';
 
-        $cmd_pattern .= ' --coverage=%s';
-        $cmd_args[] = escapeshellarg('coverage/coverage.serialized');
+        $tasks = [];
+        if ($withCoverage) {
+            $cmdPattern .= ' --coverage=%s';
+            $cmdArgs[] = escapeshellarg('coverage/coverage.serialized');
 
-        $cmd_pattern .= ' --coverage-xml=%s';
-        $cmd_args[] = escapeshellarg('coverage/coverage.xml');
+            $cmdPattern .= ' --coverage-xml=%s';
+            $cmdArgs[] = escapeshellarg('coverage/coverage.xml');
 
-        $cmd_pattern .= ' --coverage-html=%s';
-        $cmd_args[] = escapeshellarg('coverage/html');
+            $cmdPattern .= ' --coverage-html=%s';
+            $cmdArgs[] = escapeshellarg('coverage/html');
 
-        $cmd_pattern .= ' run';
+            $tasks['prepareCoverageDir'] = $this
+                ->taskFilesystemStack()
+                ->mkdir("$logDir/coverage");
+        }
 
-        $reportsDir = $this->codeceptionInfo['paths']['log'];
+        if ($withUnitReport) {
+            $cmdPattern .= ' --xml=%s';
+            $cmdArgs[] = escapeshellarg('junit/junit.xml');
 
-        /** @var \Robo\Collection\CollectionBuilder $cb */
-        $cb = $this->collectionBuilder();
-        $cb->addTaskList([
-            'prepareCoverageDir' => $this->taskFilesystemStack()->mkdir("$reportsDir/coverage"),
-            'runCodeception' => $this->taskExec(vsprintf($cmd_pattern, $cmd_args)),
-        ]);
+            $cmdPattern .= ' --html=%s';
+            $cmdArgs[] = escapeshellarg('junit/junit.html');
 
-        return $cb;
+            $tasks['prepareJUnitDir'] = $this
+                ->taskFilesystemStack()
+                ->mkdir("$logDir/junit");
+        }
+
+        $cmdPattern .= ' run';
+
+        if ($environment === 'jenkins') {
+            // Jenkins has to use a post-build action to mark the build "unstable".
+            $cmdPattern .= ' || [[ "${?}" == "1" ]]';
+        }
+
+        $tasks['runCodeception'] = $this->taskExec(vsprintf($cmdPattern, $cmdArgs));
+
+        return $this
+            ->collectionBuilder()
+            ->addTaskList($tasks);
+    }
+
+    /**
+     * @return \Cheppers\Robo\Phpcs\Task\PhpcsLintFiles|\Robo\Collection\CollectionBuilder
+     */
+    protected function getTaskPhpcsLint()
+    {
+        $env = $this->getEnvironment();
+
+        $files = [
+            'src/',
+            'tests/_data/RoboFile.php',
+            'tests/_support/Helper/',
+            'tests/acceptance/',
+            'tests/unit/',
+            'RoboFile.php',
+        ];
+
+        $options = [
+            'failOn' => 'warning',
+            'standard' => 'PSR2',
+            'lintReporters' => [
+                'lintVerboseReporter' => null,
+            ],
+        ];
+
+        if ($env === 'jenkins') {
+            $options['failOn'] = 'never';
+
+            $options['lintReporters']['lintCheckstyleReporter'] = (new CheckstyleReporter())
+                ->setDestination('tests/_output/checkstyle/phpcs.psr2.xml');
+        }
+
+        if ($env !== 'git-hook') {
+            return $this->taskPhpcsLintFiles($options + ['files' => $files]);
+        }
+
+        $assetJar = new Cheppers\AssetJar\AssetJar();
+
+        return $this
+            ->collectionBuilder()
+            ->addTaskList([
+                'git.readStagedFiles' => $this
+                    ->taskGitReadStagedFiles()
+                    ->setCommandOnly(true)
+                    ->setAssetJar($assetJar)
+                    ->setAssetJarMap('files', ['files'])
+                    ->setPaths($files),
+                'lint.phpcs.psr2' => $this
+                    ->taskPhpcsLintInput($options)
+                    ->setAssetJar($assetJar)
+                    ->setAssetJarMap('files', ['files']),
+            ]);
     }
 
     /**
@@ -224,5 +305,31 @@ class RoboFile extends \Robo\Tasks
         }
 
         return in_array($extension, explode("\n", $process->getOutput()));
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isPhpDbgAvailable()
+    {
+        $command = sprintf(
+            '%s -i | grep -- %s',
+            escapeshellcmd($this->phpExecutable),
+            escapeshellarg('--enable-phpdbg')
+        );
+
+        return (new Process($command))->run() === 0;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getLogDir()
+    {
+        $this->initCodeceptionInfo();
+
+        return !empty($this->codeceptionInfo['paths']['log']) ?
+            $this->codeceptionInfo['paths']['log']
+            : 'tests/_output';
     }
 }

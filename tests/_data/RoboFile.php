@@ -3,20 +3,13 @@
 use Cheppers\LintReport\Reporter\BaseReporter;
 use Cheppers\LintReport\Reporter\SummaryReporter;
 use Cheppers\LintReport\Reporter\VerboseReporter;
-use League\Container\ContainerAwareInterface;
 use League\Container\ContainerInterface;
-use Robo\Contract\ConfigAwareInterface;
 
-/**
- * Class RoboFile.
- */
 // @codingStandardsIgnoreStart
-class RoboFile extends \Robo\Tasks implements ContainerAwareInterface, ConfigAwareInterface
+class RoboFile extends \Robo\Tasks
 {
     // @codingStandardsIgnoreEnd
-    use \Cheppers\Robo\ScssLint\Task\LoadTasks;
-    use \League\Container\ContainerAwareTrait;
-    use \Robo\Common\ConfigAwareTrait;
+    use \Cheppers\Robo\ScssLint\ScssLintTaskLoader;
 
     /**
      * @var string

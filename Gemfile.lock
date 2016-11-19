@@ -16,7 +16,7 @@ DEPENDENCIES
   scss_lint_reporter_checkstyle
 
 RUBY VERSION
-   ruby 2.3.0p0
+   ruby 2.3.0
 
 BUNDLED WITH
    1.13.6

@@ -205,4 +205,165 @@ class ReportWrapperTest extends \Codeception\Test\Unit
             }
         }
     }
+
+    /**
+     * @return array
+     */
+    public function casesFailureComparer()
+    {
+        return [
+            'equal' => [
+                0,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'line 1 0' => [
+                -1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 1,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'line 0 1' => [
+                1,
+                [
+                    'line' => 1,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'column 1 0' => [
+                -1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 1,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'column 0 1' => [
+                1,
+                [
+                    'line' => 0,
+                    'column' => 1,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'length 1 0' => [
+                -1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 1,
+                    'reason' => 'a',
+                ],
+            ],
+            'length 0 1' => [
+                1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 1,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+            'reason a b' => [
+                -1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'b',
+                ],
+            ],
+            'reason b a' => [
+                1,
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'b',
+                ],
+                [
+                    'line' => 0,
+                    'column' => 0,
+                    'length' => 0,
+                    'reason' => 'a',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param int $expected
+     * @param array $a
+     * @param array $b
+     *
+     * @dataProvider casesFailureComparer
+     */
+    public function testFailureComparer($expected, array $a, array $b)
+    {
+        $rw = new ReportWrapper([]);
+        $class = new ReflectionClass(ReportWrapper::class);
+        $failureComparer = $class->getMethod('failureComparer');
+        $failureComparer->setAccessible(true);
+
+        $this->tester->assertEquals($expected, $failureComparer->invoke($rw, $a, $b));
+    }
 }

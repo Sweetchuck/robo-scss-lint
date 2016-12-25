@@ -3,20 +3,21 @@
     "description": "Robo task wrapper for scss-lint",
     "license": "GPL-2.0+",
     "config": {
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "sort-packages": true
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
         "cheppers/asset-jar": "^0.0",
-        "consolidation/robo": "^1.0.4"
+        "consolidation/robo": "^1.0"
     },
     "require-dev": {
-        "cheppers/git-hooks": "^0.0.8",
-        "cheppers/robo-phpcs": "^0.0.10",
+        "cheppers/git-hooks": "^0.0",
+        "cheppers/robo-git": "^0.0",
+        "cheppers/robo-phpcs": "^0.0",
         "codeception/codeception": "^2.2",
-        "symfony/yaml": "^2.8||3.1",
-        "cheppers/robo-git": "^0.0.2"
+        "symfony/yaml": "^2.8||3.1"
     },
     "autoload": {
         "psr-4": {

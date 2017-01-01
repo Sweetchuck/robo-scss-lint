@@ -3,8 +3,9 @@
 namespace Cheppers\Robo\ScssLint\Test\Unit\LintReportWrapper;
 
 use Cheppers\Robo\ScssLint\LintReportWrapper\FileWrapper;
+use Codeception\Test\Unit;
 
-class FileWrapperTest extends \Codeception\Test\Unit
+class FileWrapperTest extends Unit
 {
     /**
      * @var \UnitTester

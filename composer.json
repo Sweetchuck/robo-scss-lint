@@ -9,6 +9,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "php": ">=7.1",
         "cheppers/asset-jar": "^0.0",
         "consolidation/robo": "^1.0"
     },
@@ -22,6 +23,12 @@
     "autoload": {
         "psr-4": {
             "Cheppers\\Robo\\ScssLint\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cheppers\\Robo\\ScssLint\\Test\\Acceptance\\": "tests/acceptance/",
+            "Cheppers\\Robo\\ScssLint\\Test\\Unit\\": "tests/unit/"
         }
     },
     "scripts": {

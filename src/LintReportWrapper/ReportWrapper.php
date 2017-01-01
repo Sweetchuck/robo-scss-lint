@@ -4,21 +4,9 @@ namespace Cheppers\Robo\ScssLint\LintReportWrapper;
 
 use Cheppers\LintReport\ReportWrapperInterface;
 
-/**
- * Class ReportWrapper.
- *
- * @package Cheppers\LintReport\Wrapper\ScssLint
- */
 class ReportWrapper implements ReportWrapperInterface
 {
-
-    /**
-     * @param array $a
-     * @param array $b
-     *
-     * @return int
-     */
-    public static function failureComparer(array $a, array $b)
+    public static function failureComparer(array $a, array $b): int
     {
         $fields = [
             'line' => 0,
@@ -39,7 +27,7 @@ class ReportWrapper implements ReportWrapperInterface
                 case 'line':
                 case 'column':
                 case 'length':
-                    return $a[$field] < $b[$field] ? -1 : 1;
+                    return $a[$field] <=> $b[$field];
 
                 default:
                     return strcmp($a[$field], $b[$field]);
@@ -60,14 +48,14 @@ class ReportWrapper implements ReportWrapperInterface
     protected $reportInternal = [];
 
     /**
-     * @var int|null
+     * @var int
      */
-    protected $numOfErrors = null;
+    protected $numOfErrors = 0;
 
     /**
-     * @var int|null
+     * @var int
      */
-    protected $numOfWarnings = null;
+    protected $numOfWarnings = 0;
 
     /**
      * {@inheritdoc}
@@ -80,17 +68,15 @@ class ReportWrapper implements ReportWrapperInterface
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
-    public function getReport()
+    public function getReport(): array
     {
         return $this->report;
     }
 
     /**
-     * @param array $report
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function setReport($report)
     {
@@ -127,7 +113,7 @@ class ReportWrapper implements ReportWrapperInterface
     /**
      * {@inheritdoc}
      */
-    public function countFiles()
+    public function countFiles(): int
     {
         return count($this->report);
     }
@@ -143,9 +129,9 @@ class ReportWrapper implements ReportWrapperInterface
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function highestSeverity()
+    public function highestSeverity(): string
     {
         if ($this->numOfErrors()) {
             return ReportWrapperInterface::SEVERITY_ERROR;
@@ -161,7 +147,7 @@ class ReportWrapper implements ReportWrapperInterface
     /**
      * {@inheritdoc}
      */
-    public function numOfErrors()
+    public function numOfErrors(): int
     {
         return $this->numOfErrors;
     }
@@ -169,7 +155,7 @@ class ReportWrapper implements ReportWrapperInterface
     /**
      * {@inheritdoc}
      */
-    public function numOfWarnings()
+    public function numOfWarnings(): int
     {
         return $this->numOfWarnings;
     }

@@ -5,11 +5,6 @@ namespace Cheppers\Robo\ScssLint\LintReportWrapper;
 use Cheppers\LintReport\FileWrapperInterface;
 use Cheppers\LintReport\ReportWrapperInterface;
 
-/**
- * Class FileWrapper.
- *
- * @package Cheppers\LintReport\Wrapper\ScssLint
- */
 class FileWrapper implements FileWrapperInterface
 {
     /**
@@ -34,7 +29,7 @@ class FileWrapper implements FileWrapperInterface
     /**
      * {@inheritdoc}
      */
-    public function filePath()
+    public function filePath(): string
     {
         return $this->file['filePath'];
     }
@@ -50,7 +45,7 @@ class FileWrapper implements FileWrapperInterface
     /**
      * {@inheritdoc}
      */
-    public function numOfWarnings()
+    public function numOfWarnings(): int
     {
         return $this->file['warnings'];
     }
@@ -68,7 +63,7 @@ class FileWrapper implements FileWrapperInterface
     /**
      * {@inheritdoc}
      */
-    public function stats()
+    public function stats(): array
     {
         if (!$this->file['stats']) {
             $this->file['stats'] = [
@@ -81,7 +76,7 @@ class FileWrapper implements FileWrapperInterface
                 'source' => [],
             ];
             foreach ($this->file['failures'] as $failure) {
-                if ($this->severityComparer($this->file['stats']['severity'], $failure['severity']) === 1) {
+                if ($this->severityComparer($this->file['stats']['severity'], $failure['severity']) < 0) {
                     $this->file['stats']['severity'] = $failure['severity'];
                 }
 
@@ -101,9 +96,9 @@ class FileWrapper implements FileWrapperInterface
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function highestSeverity()
+    public function highestSeverity(): string
     {
         if ($this->numOfErrors()) {
             return ReportWrapperInterface::SEVERITY_ERROR;
@@ -117,34 +112,23 @@ class FileWrapper implements FileWrapperInterface
     }
 
     /**
-     * @param string $a
-     * @param string $b
-     *
-     * @return int
+     * {@inheritdoc}
      */
-    protected function severityComparer($a, $b)
+    protected function severityComparer(string $a, string $b): int
     {
-        $weights = [
-            'ok',
-            'warning',
-            'error',
-        ];
-
         if ($a === $b) {
             return 0;
         }
 
-        $aWeight = array_search($a, $weights);
-        $bWeight = array_search($b, $weights);
+        $weights = [
+            ReportWrapperInterface::SEVERITY_OK => 1,
+            ReportWrapperInterface::SEVERITY_WARNING => 2,
+            ReportWrapperInterface::SEVERITY_ERROR => 3,
+        ];
 
-        if ($aWeight === false) {
-            return -1;
-        }
+        $aWeight = $weights[$a] ?? 0;
+        $bWeight = $weights[$b] ?? 0;
 
-        if ($bWeight === false) {
-            return 1;
-        }
-
-        return $aWeight > $bWeight ? -1 : 1;
+        return $aWeight <=> $bWeight;
     }
 }

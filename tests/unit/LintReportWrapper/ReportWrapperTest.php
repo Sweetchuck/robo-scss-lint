@@ -1,24 +1,17 @@
 <?php
 
-// @codingStandardsIgnoreStart
+namespace Cheppers\Robo\ScssLint\Test\Unit\LintReportWrapper;
+
 use Cheppers\Robo\ScssLint\LintReportWrapper\ReportWrapper;
 
-/**
- * Class ReportWrapperTest.
- */
 class ReportWrapperTest extends \Codeception\Test\Unit
 {
-    // @codingStandardsIgnoreEnd
-
     /**
      * @var \UnitTester
      */
     protected $tester;
 
-    /**
-     * @return array
-     */
-    public function casesReports()
+    public function casesReports(): array
     {
         return [
             'ok:no-files' => [
@@ -164,13 +157,9 @@ class ReportWrapperTest extends \Codeception\Test\Unit
     }
 
     /**
-     * @param array $expected
-     * @param array $report
-     * @param array $filesStats
-     *
      * @dataProvider casesReports
      */
-    public function testAll(array $expected, array $report, array $filesStats)
+    public function testAll(array $expected, array $report, array $filesStats): void
     {
         $rw = new ReportWrapper($report);
 
@@ -206,10 +195,7 @@ class ReportWrapperTest extends \Codeception\Test\Unit
         }
     }
 
-    /**
-     * @return array
-     */
-    public function casesFailureComparer()
+    public function casesFailureComparer(): array
     {
         return [
             'equal' => [
@@ -351,16 +337,12 @@ class ReportWrapperTest extends \Codeception\Test\Unit
     }
 
     /**
-     * @param int $expected
-     * @param array $a
-     * @param array $b
-     *
      * @dataProvider casesFailureComparer
      */
-    public function testFailureComparer($expected, array $a, array $b)
+    public function testFailureComparer(int $expected, array $a, array $b)
     {
         $rw = new ReportWrapper([]);
-        $class = new ReflectionClass(ReportWrapper::class);
+        $class = new \ReflectionClass(ReportWrapper::class);
         $failureComparer = $class->getMethod('failureComparer');
         $failureComparer->setAccessible(true);
 

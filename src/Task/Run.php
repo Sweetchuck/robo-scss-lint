@@ -16,21 +16,12 @@ use Robo\Result;
 use Robo\Task\BaseTask;
 use Symfony\Component\Process\Process;
 
-/**
- * Class TaskScssLintRun.
- *
- * Assert mapping:
- *   - report: Parsed JSON lint report.
- *
- * @package Cheppers\Robo\ScssLint\Task
- */
 class Run extends BaseTask implements
     AssetJarAwareInterface,
     ContainerAwareInterface,
     BuilderAwareInterface,
     OutputAwareInterface
 {
-
     use AssetJarAware;
     use ContainerAwareTrait;
     use BuilderAwareTrait;
@@ -189,9 +180,6 @@ class Run extends BaseTask implements
     /**
      * All in one configuration.
      *
-     * @param array $options
-     *   Options.
-     *
      * @return $this
      */
     public function options(array $options)
@@ -258,12 +246,9 @@ class Run extends BaseTask implements
     /**
      * Set the current working directory.
      *
-     * @param string $value
-     *   Directory path.
-     *
      * @return $this
      */
-    public function workingDirectory($value)
+    public function workingDirectory(string $value)
     {
         $this->workingDirectory = $value;
 
@@ -278,7 +263,7 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function failOn($value)
+    public function failOn(string $value)
     {
         $this->failOn = $value;
 
@@ -288,12 +273,9 @@ class Run extends BaseTask implements
     /**
      * Fail if there is no SCSS file to lint.
      *
-     * @param bool $value
-     *   Default: false.
-     *
      * @return $this
      */
-    public function failOnNoFiles($value)
+    public function failOnNoFiles(bool $value)
     {
         $this->failOnNoFiles = $value;
 
@@ -303,7 +285,7 @@ class Run extends BaseTask implements
     /**
      * @return \Cheppers\LintReport\ReporterInterface[]
      */
-    public function getLintReporters()
+    public function getLintReporters(): array
     {
         return $this->lintReporters;
     }
@@ -326,7 +308,7 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function addLintReporter($id, $lintReporter = null)
+    public function addLintReporter(string $id, $lintReporter = null)
     {
         $this->lintReporters[$id] = $lintReporter;
 
@@ -334,11 +316,9 @@ class Run extends BaseTask implements
     }
 
     /**
-     * @param string $id
-     *
      * @return $this
      */
-    public function removeLintReporter($id)
+    public function removeLintReporter(string $id)
     {
         unset($this->lintReporters[$id]);
 
@@ -360,7 +340,7 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function format($value)
+    public function format(string $value)
     {
         $this->format = $value;
 
@@ -377,8 +357,12 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function requires($gems, $include = true)
+    public function requires($gems, bool $include = true)
     {
+        if (!is_array($gems)) {
+            $gems = [$gems => $include];
+        }
+
         $this->requires = $this->createIncludeList($gems, $include) + $this->requires;
 
         return $this;
@@ -394,8 +378,12 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function linters($names, $include = true)
+    public function linters($names, bool $include = true)
     {
+        if (!is_array($names)) {
+            $names = [$names => $include];
+        }
+
         $this->linters = $this->createIncludeList($names, $include) + $this->linters;
 
         return $this;
@@ -404,12 +392,9 @@ class Run extends BaseTask implements
     /**
      * Specify which configuration file you want to use.
      *
-     * @param string $path
-     *   File path.
-     *
      * @return $this
      */
-    public function configFile($path)
+    public function configFile(string $path)
     {
         $this->configFile = $path;
 
@@ -419,16 +404,20 @@ class Run extends BaseTask implements
     /**
      * List of file names to exclude.
      *
-     * @param string|string[]|bool[] $file_paths
+     * @param string|string[]|bool[] $filePaths
      *   File names.
      * @param bool $include
-     *   If TRUE $file_paths will be added to the exclude list.
+     *   If TRUE $filePaths will be added to the exclude list.
      *
      * @return $this
      */
-    public function exclude($file_paths, $include = true)
+    public function exclude($filePaths, bool $include = true)
     {
-        $this->exclude = $this->createIncludeList($file_paths, $include) + $this->exclude;
+        if (!is_array($filePaths)) {
+            $filePaths = [$filePaths => $include];
+        }
+
+        $this->exclude = $this->createIncludeList($filePaths, $include) + $this->exclude;
 
         return $this;
     }
@@ -436,13 +425,13 @@ class Run extends BaseTask implements
     /**
      * Write output to a file instead of STDOUT.
      *
-     * @param string|null $file_path
+     * @param string|null $filePath
      *
      * @return $this
      */
-    public function out($file_path)
+    public function out(string $filePath)
     {
-        $this->out = $file_path;
+        $this->out = $filePath;
 
         return $this;
     }
@@ -454,7 +443,7 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function color($colorize)
+    public function color(?bool $colorize)
     {
         $this->colorize = $colorize;
 
@@ -464,7 +453,7 @@ class Run extends BaseTask implements
     /**
      * The array key is the relevant value and the array value will be a boolean.
      *
-     * @param string|string[]|bool[] $items
+     * @param string[]|bool[] $items
      *   Items.
      * @param bool $include
      *   Default value.
@@ -472,12 +461,8 @@ class Run extends BaseTask implements
      * @return bool[]
      *   Key is the relevant value, the value is a boolean.
      */
-    protected function createIncludeList($items, $include)
+    protected function createIncludeList(array $items, bool $include): array
     {
-        if (!is_array($items)) {
-            $items = [$items => $include];
-        }
-
         $item = reset($items);
         if (gettype($item) !== 'boolean') {
             $items = array_fill_keys($items, $include);
@@ -504,7 +489,7 @@ class Run extends BaseTask implements
     }
 
     /**
-     * TaskScssLintRun class run function.
+     * {@inheritdoc}
      */
     public function run()
     {
@@ -569,11 +554,8 @@ class Run extends BaseTask implements
 
     /**
      * Build the CLI command based on the configuration.
-     *
-     * @return string
-     *   CLI command to execute.
      */
-    public function buildCommand()
+    public function buildCommand(): string
     {
         $cmd_pattern = 'bundle exec scss-lint';
         $cmd_args = [];
@@ -628,10 +610,7 @@ class Run extends BaseTask implements
         return vsprintf($cmd_pattern, $cmd_args);
     }
 
-    /**
-     * @return bool
-     */
-    protected function isReportHasToBePutBackIntoJar()
+    protected function isReportHasToBePutBackIntoJar(): bool
     {
         return (
             $this->hasAssetJar()
@@ -643,7 +622,7 @@ class Run extends BaseTask implements
     /**
      * @return \Cheppers\LintReport\ReporterInterface[]
      */
-    protected function initLintReporters()
+    protected function initLintReporters(): array
     {
         $lintReporters = [];
         $c = $this->getContainer();
@@ -673,13 +652,8 @@ class Run extends BaseTask implements
 
     /**
      * Get the exit code regarding the failOn settings.
-     *
-     * @param int $numOfErrors
-     * @param int $numOfWarnings
-     *
-     * @return int
      */
-    protected function getTaskExitCode($numOfErrors, $numOfWarnings)
+    protected function getTaskExitCode(int $numOfErrors, int $numOfWarnings): int
     {
         if ($this->exitCode === static::EXIT_CODE_NO_FILES) {
             return ($this->failOnNoFiles ? static::EXIT_CODE_NO_FILES : static::EXIT_CODE_OK);
@@ -705,28 +679,21 @@ class Run extends BaseTask implements
         return $this->exitCode;
     }
 
-    /**
-     * @param int $exitCode
-     *
-     * @return string
-     */
-    protected function getExitMessage($exitCode)
+    protected function getExitMessage(int $exitCode): ?string
     {
         if (isset($this->exitMessages[$exitCode])) {
             return $this->exitMessages[$exitCode];
         }
 
-        return false;
+        return null;
     }
 
     /**
      * Returns true if the lint ran successfully.
      *
      * Returns true even if there was any code style error or warning.
-     *
-     * @return bool
      */
-    protected function isLintSuccess()
+    protected function isLintSuccess(): bool
     {
         return in_array($this->exitCode, $this->lintSuccessExitCodes());
     }
@@ -734,7 +701,7 @@ class Run extends BaseTask implements
     /**
      * @return int[]
      */
-    protected function lintSuccessExitCodes()
+    protected function lintSuccessExitCodes(): array
     {
         return [
             static::EXIT_CODE_OK,

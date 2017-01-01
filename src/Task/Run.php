@@ -11,6 +11,7 @@ use League\Container\ContainerAwareTrait;
 use Robo\Common\BuilderAwareTrait;
 use Robo\Common\IO;
 use Robo\Contract\BuilderAwareInterface;
+use Robo\Contract\CommandInterface;
 use Robo\Contract\OutputAwareInterface;
 use Robo\Result;
 use Robo\Task\BaseTask;
@@ -18,6 +19,7 @@ use Symfony\Component\Process\Process;
 
 class Run extends BaseTask implements
     AssetJarAwareInterface,
+    CommandInterface,
     ContainerAwareInterface,
     BuilderAwareInterface,
     OutputAwareInterface
@@ -56,6 +58,8 @@ class Run extends BaseTask implements
      */
     protected $processClass = Process::class;
 
+    //region Options.
+    //region Option - workingDirectory.
     /**
      * Directory to step in before run the `scss-lint`.
      *
@@ -63,184 +67,9 @@ class Run extends BaseTask implements
      */
     protected $workingDirectory = '';
 
-    /**
-     * Severity level.
-     *
-     * @var bool
-     */
-    protected $failOn = 'error';
-
-    /**
-     * Fail if there is no SCSS file to lint.
-     *
-     * @var bool
-     */
-    protected $failOnNoFiles = false;
-
-    /**
-     * @var \Cheppers\LintReport\ReporterInterface[]
-     */
-    protected $lintReporters = [];
-
-    /**
-     * Specify how to display lints.
-     *
-     * @var string
-     */
-    protected $format = '';
-
-    /**
-     * Required Ruby files.
-     *
-     * @var array
-     */
-    protected $requires = [];
-
-    /**
-     * Linters to include or exclude.
-     *
-     * @var array
-     */
-    protected $linters = [];
-
-    /**
-     * Config file path.
-     *
-     * @var string
-     */
-    protected $configFile = null;
-
-    /**
-     * SCSS files to exclude.
-     *
-     * @var array
-     */
-    protected $exclude = [];
-
-    /**
-     * Write output to a file instead of STDOUT.
-     *
-     * @var string
-     */
-    protected $out = '';
-
-    /**
-     * Force output to be colorized.
-     *
-     * @var bool|null
-     */
-    protected $colorize = null;
-
-    /**
-     * SCSS files to check.
-     *
-     * @var array
-     */
-    protected $paths = [];
-
-    /**
-     * Process exit code.
-     *
-     * @var int
-     */
-    protected $exitCode = 0;
-
-    /**
-     * Exit code and error message mapping.
-     *
-     * @var string
-     */
-    protected $exitMessages = [
-        0 => 'No lints were found',
-        1 => 'Lints with a severity of warning were reported (no errors)',
-        2 => 'One or more errors were reported (and any number of warnings)',
-        3 => 'Extra lint reporters can be used only if the output format is "json".',
-        64 => 'Command line usage error (invalid flag, etc.)',
-        66 => 'One or more files specified were not found',
-        69 => 'Required library specified via -r/--require flag was not found',
-        70 => 'Unexpected error (i.e. a bug); please report it',
-        78 => 'Invalid configuration file; your YAML is likely incorrect',
-        80 => 'Files glob patterns specified did not match any files.',
-    ];
-
-    /**
-     * TaskScssLintRun constructor.
-     *
-     * @param array $options
-     *   Key-value pairs of options.
-     * @param array $paths
-     *   File paths.
-     */
-    public function __construct(array $options = [], array $paths = [])
+    public function getWorkingDirectory(): string
     {
-        $this->options($options);
-        $this->paths($paths);
-    }
-
-    /**
-     * All in one configuration.
-     *
-     * @return $this
-     */
-    public function options(array $options)
-    {
-        foreach ($options as $name => $value) {
-            switch ($name) {
-                case 'assetJarMapping':
-                    $this->setAssetJarMapping($value);
-                    break;
-
-                case 'workingDirectory':
-                    $this->workingDirectory($value);
-                    break;
-
-                case 'failOn':
-                    $this->failOn($value);
-                    break;
-
-                case 'failOnNoFiles':
-                    $this->failOnNoFiles($value);
-                    break;
-
-                case 'lintReporters':
-                    $this->setLintReporters($value);
-                    break;
-
-                case 'format':
-                    $this->format($value);
-                    break;
-
-                case 'requires':
-                    $this->requires($value);
-                    break;
-
-                case 'linters':
-                    $this->linters($value);
-                    break;
-
-                case 'configFile':
-                    $this->configFile($value);
-                    break;
-
-                case 'exclude':
-                    $this->exclude($value);
-                    break;
-
-                case 'out':
-                    $this->out($value);
-                    break;
-
-                case 'color':
-                    $this->color($value);
-                    break;
-
-                case 'paths':
-                    $this->paths($value);
-                    break;
-            }
-        }
-
-        return $this;
+        return $this->workingDirectory;
     }
 
     /**
@@ -248,11 +77,69 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function workingDirectory(string $value)
+    public function setWorkingDirectory(string $value)
     {
         $this->workingDirectory = $value;
 
         return $this;
+    }
+    //endregion
+
+    //region Option - bundleGemFile.
+    /**
+     * @var string
+     */
+    protected $bundleGemFile = '';
+
+    public function getBundleGemFile(): string
+    {
+        return $this->bundleGemFile;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setBundleGemFile(string $bundleGemFile)
+    {
+        $this->bundleGemFile = $bundleGemFile;
+
+        return $this;
+    }
+    //endregion
+
+    //region Option - bundleExec.
+    /**
+     * @var bool
+     */
+    protected $bundleExec = true;
+
+    protected function getBundleExec(): bool
+    {
+        return $this->bundleExec;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function setBundleExec(bool $value)
+    {
+        $this->bundleExec = $value;
+
+        return $this;
+    }
+    //endregion
+
+    //region Option - failOn.
+    /**
+     * Severity level.
+     *
+     * @var string
+     */
+    protected $failOn = 'error';
+
+    public function getFailOn(): string
+    {
+        return $this->failOn;
     }
 
     /**
@@ -263,11 +150,25 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function failOn(string $value)
+    public function setFailOn(string $value)
     {
         $this->failOn = $value;
 
         return $this;
+    }
+    //endregion
+
+    //region Option - failOnNoFiles.
+    /**
+     * Fail if there is no SCSS file to lint.
+     *
+     * @var bool
+     */
+    protected $failOnNoFiles = false;
+
+    public function getFailOnNoFiles(): bool
+    {
+        return $this->failOnNoFiles;
     }
 
     /**
@@ -275,12 +176,19 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function failOnNoFiles(bool $value)
+    public function setFailOnNoFiles(bool $value)
     {
         $this->failOnNoFiles = $value;
 
         return $this;
     }
+    //endregion
+
+    //region Option - lintReporters.
+    /**
+     * @var \Cheppers\LintReport\ReporterInterface[]
+     */
+    protected $lintReporters = [];
 
     /**
      * @return \Cheppers\LintReport\ReporterInterface[]
@@ -324,6 +232,20 @@ class Run extends BaseTask implements
 
         return $this;
     }
+    //endregion
+
+    //region Option - format.
+    /**
+     * Specify how to display lints.
+     *
+     * @var string
+     */
+    protected $format = '';
+
+    public function getFormat(): string
+    {
+        return $this->format;
+    }
 
     /**
      * Specify how to display lints.
@@ -340,11 +262,25 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function format(string $value)
+    public function setFormat(string $value)
     {
         $this->format = $value;
 
         return $this;
+    }
+    //endregion
+
+    //region Option - requires.
+    /**
+     * Required Ruby files.
+     *
+     * @var array
+     */
+    protected $require = [];
+
+    public function getRequire(): array
+    {
+        return $this->require;
     }
 
     /**
@@ -357,15 +293,29 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function requires($gems, bool $include = true)
+    public function setRequire($gems, bool $include = true)
     {
         if (!is_array($gems)) {
             $gems = [$gems => $include];
         }
 
-        $this->requires = $this->createIncludeList($gems, $include) + $this->requires;
+        $this->require = $this->createIncludeList($gems, $include) + $this->require;
 
         return $this;
+    }
+    //endregion
+
+    //region Option - linters.
+    /**
+     * Linters to include or exclude.
+     *
+     * @var array
+     */
+    protected $linters = [];
+
+    public function getLinters(): array
+    {
+        return $this->linters;
     }
 
     /**
@@ -378,7 +328,7 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function linters($names, bool $include = true)
+    public function setLinters($names, bool $include = true)
     {
         if (!is_array($names)) {
             $names = [$names => $include];
@@ -388,17 +338,45 @@ class Run extends BaseTask implements
 
         return $this;
     }
+    //endregion
+
+    //region Option - configFile.
+    /**
+     * Config file path.
+     *
+     * @var string
+     */
+    protected $configFile = '';
+
+    public function getConfigFile(): string
+    {
+        return $this->configFile;
+    }
 
     /**
      * Specify which configuration file you want to use.
      *
      * @return $this
      */
-    public function configFile(string $path)
+    public function setConfigFile(string $path)
     {
         $this->configFile = $path;
 
         return $this;
+    }
+    //endregion
+
+    //region Option - exclude.
+    /**
+     * SCSS files to exclude.
+     *
+     * @var array
+     */
+    protected $exclude = [];
+
+    public function getExclude(): array
+    {
+        return $this->exclude;
     }
 
     /**
@@ -411,7 +389,7 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function exclude($filePaths, bool $include = true)
+    public function setExclude($filePaths, bool $include = true)
     {
         if (!is_array($filePaths)) {
             $filePaths = [$filePaths => $include];
@@ -421,6 +399,20 @@ class Run extends BaseTask implements
 
         return $this;
     }
+    //endregion
+
+    //region Option - out.
+    /**
+     * Write output to a file instead of STDOUT.
+     *
+     * @var string
+     */
+    protected $out = '';
+
+    public function getOut(): string
+    {
+        return $this->out;
+    }
 
     /**
      * Write output to a file instead of STDOUT.
@@ -429,23 +421,186 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function out(string $filePath)
+    public function setOut(string $filePath)
     {
         $this->out = $filePath;
 
         return $this;
     }
+    //endregion
+
+    //region Option - colorize.
+    /**
+     * Force output to be colorized.
+     *
+     * @var bool|null
+     */
+    protected $colorize = null;
+
+    public function getColor(): ?bool
+    {
+        return $this->colorize;
+    }
 
     /**
      * Force output to be colorized.
      *
-     * @param bool|null $colorize
+     * @return $this
+     */
+    public function setColor(?bool $colorize)
+    {
+        $this->colorize = $colorize;
+
+        return $this;
+    }
+    //endregion
+
+    //region Option - paths.
+    /**
+     * SCSS files to check.
+     *
+     * @var array
+     */
+    protected $paths = [];
+
+    public function getPaths(): array
+    {
+        return $this->paths;
+    }
+
+    /**
+     * File paths to lint.
+     *
+     * @param string|string[]|bool[] $paths
+     *   Key-value pair of file names and boolean.
+     * @param bool $include
+     *   Exclude or include the files in $paths.
      *
      * @return $this
      */
-    public function color(?bool $colorize)
+    public function paths(array $paths, bool $include = true)
     {
-        $this->colorize = $colorize;
+        $this->paths = $this->createIncludeList($paths, $include) + $this->paths;
+
+        return $this;
+    }
+    //endregion
+    //endregion
+
+    protected $options = [
+        'format' => 'value',
+        'require' => 'multi-value',
+        'linter' => 'include-exclude',
+        'exclude' => 'list',
+        'config' => 'value',
+        'out' =>  'value',
+        'color' => 'tri-state',
+    ];
+
+    /**
+     * Process exit code.
+     *
+     * @var int
+     */
+    protected $exitCode = 0;
+
+    /**
+     * Exit code and error message mapping.
+     *
+     * @var string
+     */
+    protected $exitMessages = [
+        0 => 'No lints were found',
+        1 => 'Lints with a severity of warning were reported (no errors)',
+        2 => 'One or more errors were reported (and any number of warnings)',
+        3 => 'Extra lint reporters can be used only if the output format is "json".',
+        64 => 'Command line usage error (invalid flag, etc.)',
+        66 => 'One or more files specified were not found',
+        69 => 'Required library specified via -r/--require flag was not found',
+        70 => 'Unexpected error (i.e. a bug); please report it',
+        78 => 'Invalid configuration file; your YAML is likely incorrect',
+        80 => 'Files glob patterns specified did not match any files.',
+    ];
+
+    /**
+     * TaskScssLintRun constructor.
+     *
+     * @param array $options
+     *   Key-value pairs of options.
+     * @param array $paths
+     *   File paths.
+     */
+    public function __construct(array $options = [], array $paths = [])
+    {
+        $this->setOptions($options);
+        $this->paths($paths);
+    }
+
+    public function setOptions(array $options): self
+    {
+        foreach ($options as $name => $value) {
+            switch ($name) {
+                case 'assetJarMapping':
+                    $this->setAssetJarMapping($value);
+                    break;
+
+                case 'workingDirectory':
+                    $this->setWorkingDirectory($value);
+                    break;
+
+                case 'bundleGemFile':
+                    $this->setBundleGemFile($value);
+                    break;
+
+                case 'bundleExec':
+                    $this->setBundleExec($value);
+                    break;
+
+                case 'failOn':
+                    $this->setFailOn($value);
+                    break;
+
+                case 'failOnNoFiles':
+                    $this->setFailOnNoFiles($value);
+                    break;
+
+                case 'lintReporters':
+                    $this->setLintReporters($value);
+                    break;
+
+                case 'format':
+                    $this->setFormat($value);
+                    break;
+
+                case 'require':
+                    $this->setRequire($value);
+                    break;
+
+                case 'linters':
+                    $this->setLinters($value);
+                    break;
+
+                case 'configFile':
+                    $this->setConfigFile($value);
+                    break;
+
+                case 'exclude':
+                    $this->setExclude($value);
+                    break;
+
+                case 'out':
+                    $this->setOut($value);
+                    break;
+
+                case 'color':
+                    $this->setColor($value);
+                    break;
+
+                case 'paths':
+                    $this->paths($value);
+                    break;
+            }
+        }
 
         return $this;
     }
@@ -472,28 +627,11 @@ class Run extends BaseTask implements
     }
 
     /**
-     * File paths to lint.
-     *
-     * @param string|string[]|bool[] $paths
-     *   Key-value pair of file names and boolean.
-     * @param bool $include
-     *   Exclude or include the files in $paths.
-     *
-     * @return $this
-     */
-    public function paths(array $paths, $include = true)
-    {
-        $this->paths = $this->createIncludeList($paths, $include) + $this->paths;
-
-        return $this;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function run()
     {
-        $command = $this->buildCommand();
+        $command = $this->getCommand();
         $this->printTaskInfo(sprintf('SCSS lint task runs: <info>%s</info>', $command));
 
         $lintReporters = $this->initLintReporters();
@@ -505,13 +643,8 @@ class Run extends BaseTask implements
 
         /** @var Process $process */
         $process = new $this->processClass($command);
-        if ($this->workingDirectory) {
-            $process->setWorkingDirectory($this->workingDirectory);
-        }
 
-        $this->startTimer();
         $this->exitCode = $process->run();
-        $this->stopTimer();
 
         $numOfErrors = $this->exitCode;
         $numOfWarnings = 0;
@@ -545,69 +678,100 @@ class Run extends BaseTask implements
         return new Result(
             $this,
             $exitCode,
-            $this->getExitMessage($exitCode) ?: $process->getErrorOutput(),
-            [
-                'time' => $this->getExecutionTime(),
-            ]
+            $this->getExitMessage($exitCode) ?: $process->getErrorOutput()
         );
     }
 
     /**
-     * Build the CLI command based on the configuration.
+     * {@inheritdoc}
      */
-    public function buildCommand(): string
+    public function getCommand(): string
     {
-        $cmd_pattern = 'bundle exec scss-lint';
-        $cmd_args = [];
+        $options = $this->getCommandOptions();
 
-        if ($this->format) {
-            $cmd_pattern .= ' --format=%s';
-            $cmd_args[] = escapeshellarg($this->format);
+        $cmdPattern = '';
+        $cmdArgs = [];
+        if ($this->getWorkingDirectory()) {
+            $cmdPattern .= 'cd %s && ';
+            $cmdArgs[] = escapeshellarg($this->getWorkingDirectory());
         }
 
-        $gems = array_keys($this->requires, true, true);
-        $cmd_pattern .= str_repeat(' --require=%s', count($gems));
-        foreach ($gems as $gem) {
-            $cmd_args[] = escapeshellarg($gem);
+        if ($this->getBundleGemFile()) {
+            $cmdPattern .= 'BUNDLE_GEMFILE=%s ';
+            $cmdArgs[] = escapeshellarg($this->getBundleGemFile());
         }
 
-        foreach (['include' => true, 'exclude' => false] as $name => $filter) {
-            $linters = array_keys($this->linters, $filter, true);
-            if ($linters) {
-                $cmd_pattern .= " --$name-linter=%s";
-                $cmd_args[] = escapeshellarg(implode(',', $linters));
+        if ($this->getBundleExec()) {
+            $cmdPattern .= 'bundle exec ';
+        }
+
+        $cmdPattern .= 'scss-lint';
+
+        foreach ($options as $optionName => $optionValue) {
+            switch ($this->options[$optionName]) {
+                case 'value':
+                    if ($optionValue) {
+                        $cmdPattern .= " --$optionName=%s";
+                        $cmdArgs[] = escapeshellarg($optionValue);
+                    }
+                    break;
+
+                case 'multi-value':
+                    $values = array_keys($optionValue, true, true);
+                    $cmdPattern .= str_repeat(" --$optionName=%s", count($values));
+                    foreach ($values as $value) {
+                        $cmdArgs[] = escapeshellarg($value);
+                    }
+                    break;
+
+                case 'list':
+                    $values = array_keys($optionValue, true, true);
+                    if ($values) {
+                        $cmdPattern .= " --$optionName=%s";
+                        $cmdArgs[] = escapeshellarg(implode(',', $values));
+                    }
+                    break;
+
+                case 'tri-state':
+                    if ($optionValue !== null) {
+                        $cmdPattern .= $optionValue ? " --$optionName" : " --no-$optionName";
+                    }
+                    break;
+
+                case 'include-exclude':
+                    foreach (['include' => true, 'exclude' => false] as $optionNamePrefix => $filter) {
+                        $values = array_keys($optionValue, $filter, true);
+                        if ($values) {
+                            $cmdPattern .= " --$optionNamePrefix-$optionName=%s";
+                            $cmdArgs[] = escapeshellarg(implode(',', $values));
+                        }
+                    }
+                    break;
             }
         }
 
-        if ($this->configFile) {
-            $cmd_pattern .= ' --config=%s';
-            $cmd_args[] = escapeshellarg($this->configFile);
-        }
-
-        $exclude = array_keys($this->exclude, true, true);
-        if ($exclude) {
-            $cmd_pattern .= ' --exclude=%s';
-            $cmd_args[] = escapeshellarg(implode(',', $exclude));
-        }
-
-        if ($this->out) {
-            $cmd_pattern .= ' --out=%s';
-            $cmd_args[] = escapeshellarg($this->out);
-        }
-
-        if ($this->colorize !== null) {
-            $cmd_pattern .= $this->colorize ? ' --color' : ' --no-color';
-        }
-
-        $paths = array_keys($this->paths, true, true);
+        $paths = array_keys($this->getPaths(), true, true);
         if ($paths) {
-            $cmd_pattern .= ' --' . str_repeat(' %s', count($paths));
+            $cmdPattern .= ' --' . str_repeat(' %s', count($paths));
             foreach ($paths as $path) {
-                $cmd_args[] = escapeshellarg($path);
+                $cmdArgs[] = escapeshellarg($path);
             }
         }
 
-        return vsprintf($cmd_pattern, $cmd_args);
+        return vsprintf($cmdPattern, $cmdArgs);
+    }
+
+    protected function getCommandOptions(): array
+    {
+        return [
+            'format' => $this->getFormat(),
+            'require' => $this->getRequire(),
+            'linter' => $this->getLinters(),
+            'config' => $this->getConfigFile(),
+            'exclude' => $this->getExclude(),
+            'out' =>  $this->getOut(),
+            'color' => $this->getColor(),
+        ];
     }
 
     protected function isReportHasToBePutBackIntoJar(): bool

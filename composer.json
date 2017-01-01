@@ -18,7 +18,7 @@
         "cheppers/robo-git": "^0.0",
         "cheppers/robo-phpcs": "^0.0",
         "codeception/codeception": "^2.2",
-        "symfony/yaml": "^2.8||3.1"
+        "symfony/yaml": "^2.8||^3.1"
     },
     "autoload": {
         "psr-4": {

@@ -59,12 +59,27 @@ class TaskScssLintRunTest extends Unit
         );
     }
 
-    public function casesBuildCommand(): array
+    public function casesGetCommand(): array
     {
         return [
             'basic' => [
                 'bundle exec scss-lint',
                 [],
+                [],
+            ],
+            'working-directory' => [
+                "cd 'my-dir' && bundle exec scss-lint",
+                ['workingDirectory' => 'my-dir'],
+                [],
+            ],
+            'bundle-gem-file' => [
+                "BUNDLE_GEMFILE='a/b/Gemfile' bundle exec scss-lint",
+                ['bundleGemFile' => 'a/b/Gemfile'],
+                [],
+            ],
+            'no-bundle-exec' => [
+                'scss-lint',
+                ['bundleExec' => false],
                 [],
             ],
             'format-empty' => [
@@ -79,17 +94,17 @@ class TaskScssLintRunTest extends Unit
             ],
             'require-string' => [
                 "bundle exec scss-lint --require='foo'",
-                ['requires' => 'foo'],
+                ['require' => 'foo'],
                 [],
             ],
             'require-vector' => [
                 "bundle exec scss-lint --require='foo' --require='bar' --require='baz'",
-                ['requires' => ['foo', 'bar', 'baz']],
+                ['require' => ['foo', 'bar', 'baz']],
                 [],
             ],
             'require-assoc' => [
                 "bundle exec scss-lint --require='foo' --require='baz'",
-                ['requires' => ['foo' => true, 'bar' => false, 'baz' => true]],
+                ['require' => ['foo' => true, 'bar' => false, 'baz' => true]],
                 [],
             ],
             'linters-string' => [
@@ -195,12 +210,12 @@ class TaskScssLintRunTest extends Unit
     }
 
     /**
-     * @dataProvider casesBuildCommand
+     * @dataProvider casesGetCommand
      */
-    public function testBuildCommand(string $expected, array $options, array $paths): void
+    public function testGetCommand(string $expected, array $options, array $paths): void
     {
         $task = new Task($options, $paths);
-        $this->tester->assertEquals($expected, $task->buildCommand());
+        $this->tester->assertEquals($expected, $task->getCommand());
     }
 
     public function testExitCodeConstants(): void
@@ -438,12 +453,6 @@ class TaskScssLintRunTest extends Unit
             $exitCode,
             $result->getExitCode(),
             'Exit code'
-        );
-
-        $this->tester->assertEquals(
-            $options['workingDirectory'],
-            DummyProcess::$instances[$processIndex]->getWorkingDirectory(),
-            'Working directory'
         );
 
         if ($withJar) {

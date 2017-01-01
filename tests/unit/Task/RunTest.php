@@ -1,26 +1,21 @@
 <?php
 
+namespace Cheppers\Robo\ScssLint\Test\Unit\Task;
+
+use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\VerboseReporter;
 use Cheppers\Robo\ScssLint\Task\Run as Task;
+use Codeception\Test\Unit;
 use Codeception\Util\Stub;
+use Helper\Dummy\Output as DummyOutput;
+use Helper\Dummy\Process as DummyProcess;
 use Robo\Robo;
 
-/**
- * Class TaskScssLintRunTest.
- */
-// @codingStandardsIgnoreStart
-class TaskScssLintRunTest extends \Codeception\Test\Unit
+class TaskScssLintRunTest extends Unit
 {
-    // @codingStandardsIgnoreEnd
-
-    /**
-     * @param $name
-     *
-     * @return \ReflectionMethod
-     */
-    protected static function getMethod($name)
+    protected static function getMethod(string $name): \ReflectionMethod
     {
-        $class = new ReflectionClass(Task::class);
+        $class = new \ReflectionClass(Task::class);
         $method = $class->getMethod($name);
         $method->setAccessible(true);
 
@@ -39,10 +34,10 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
     {
         parent::setUp();
 
-        \Helper\Dummy\Process::reset();
+        DummyProcess::reset();
     }
 
-    public function testGetSetLintReporters()
+    public function testGetSetLintReporters(): void
     {
         $task = new Task([
             'lintReporters' => [
@@ -64,10 +59,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
         );
     }
 
-    /**
-     * @return array
-     */
-    public function casesBuildCommand()
+    public function casesBuildCommand(): array
     {
         return [
             'basic' => [
@@ -204,18 +196,14 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
 
     /**
      * @dataProvider casesBuildCommand
-     *
-     * @param string $expected
-     * @param array $options
-     * @param array $paths
      */
-    public function testBuildCommand($expected, array $options, array $paths)
+    public function testBuildCommand(string $expected, array $options, array $paths): void
     {
         $task = new Task($options, $paths);
         $this->tester->assertEquals($expected, $task->buildCommand());
     }
 
-    public function testExitCodeConstants()
+    public function testExitCodeConstants(): void
     {
         $this->tester->assertEquals(0, Task::EXIT_CODE_OK);
         $this->tester->assertEquals(1, Task::EXIT_CODE_WARNING);
@@ -223,10 +211,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
         $this->tester->assertEquals(80, Task::EXIT_CODE_NO_FILES);
     }
 
-    /**
-     * @return array
-     */
-    public function casesGetTaskExitCode()
+    public function casesGetTaskExitCode(): array
     {
         $o = Task::EXIT_CODE_OK;
         $w = Task::EXIT_CODE_WARNING;
@@ -307,17 +292,16 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
     }
 
     /**
-     * @param int $expected
-     * @param string $failOn
-     * @param bool $failOnNoFiles
-     * @param int $numOfErrors
-     * @param int $numOfWarnings
-     * @param int $exitCode
-     *
      * @dataProvider casesGetTaskExitCode
      */
-    public function testGetTaskExitCode($expected, $failOn, $failOnNoFiles, $numOfErrors, $numOfWarnings, $exitCode)
-    {
+    public function testGetTaskExitCode(
+        int $expected,
+        string $failOn,
+        bool $failOnNoFiles,
+        int $numOfErrors,
+        int $numOfWarnings,
+        int $exitCode
+    ): void {
         /** @var Task $task */
         $task = Stub::construct(
             Task::class,
@@ -331,10 +315,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
         );
     }
 
-    /**
-     * @return array
-     */
-    public function casesRun()
+    public function casesRun(): array
     {
         $reportBase = [];
 
@@ -409,19 +390,14 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
     /**
      * This way cannot be tested those cases when the lint process failed.
      *
-     * @param int $exitCode
-     * @param array $options
-     * @param bool $withJar
-     * @param bool $expectedStdOutput
-     *
      * @dataProvider casesRun
      */
-    public function testRun($exitCode, $options, $withJar, $expectedStdOutput)
+    public function testRun(int $exitCode, array $options, bool $withJar, string $expectedStdOutput): void
     {
-        $container = \Robo\Robo::createDefaultContainer();
-        \Robo\Robo::setContainer($container);
+        $container = Robo::createDefaultContainer();
+        Robo::setContainer($container);
 
-        $mainStdOutput = new \Helper\Dummy\Output();
+        $mainStdOutput = new DummyOutput();
 
         $options += [
             'workingDirectory' => 'my-working-dir',
@@ -436,13 +412,13 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
             Task::class,
             [$options, []],
             [
-                'processClass' => \Helper\Dummy\Process::class,
+                'processClass' => DummyProcess::class,
             ]
         );
 
-        $processIndex = count(\Helper\Dummy\Process::$instances);
+        $processIndex = count(DummyProcess::$instances);
 
-        \Helper\Dummy\Process::$prophecy[$processIndex] = [
+        DummyProcess::$prophecy[$processIndex] = [
             'exitCode' => $exitCode,
             'stdOutput' => $expectedStdOutput,
         ];
@@ -452,7 +428,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
 
         $assetJar = null;
         if ($withJar) {
-            $assetJar = new \Cheppers\AssetJar\AssetJar();
+            $assetJar = new AssetJar();
             $task->setAssetJar($assetJar);
         }
 
@@ -466,7 +442,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
 
         $this->tester->assertEquals(
             $options['workingDirectory'],
-            \Helper\Dummy\Process::$instances[$processIndex]->getWorkingDirectory(),
+            DummyProcess::$instances[$processIndex]->getWorkingDirectory(),
             'Working directory'
         );
 
@@ -487,10 +463,10 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
         }
     }
 
-    public function testRunNativeAndExtraReporterConflict()
+    public function testRunNativeAndExtraReporterConflict(): void
     {
-        $container = \Robo\Robo::createDefaultContainer();
-        \Robo\Robo::setContainer($container);
+        $container = Robo::createDefaultContainer();
+        Robo::setContainer($container);
 
         $options = [
             'format' => 'stylish',
@@ -509,7 +485,7 @@ class TaskScssLintRunTest extends \Codeception\Test\Unit
         );
 
         $task->setLogger($container->get('logger'));
-        $assetJar = new \Cheppers\AssetJar\AssetJar();
+        $assetJar = new AssetJar();
         $task->setAssetJar($assetJar);
 
         $result = $task->run();

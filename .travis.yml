@@ -11,14 +11,14 @@ matrix:
             dist: 'trusty'
             sudo: 'required'
             language: 'php'
-            php: '5.6'
+            php: '7.1'
             env:
                 - "COMPOSER_NO_INTERACTION=1 COMPOSER_DISABLE_XDEBUG_WARN=1 RUBY_VERSION=$(bundle platform --ruby | awk '{print $2}')"
         -
             os: 'osx'
             language: 'generic'
             env:
-                - "COMPOSER_NO_INTERACTION=1 COMPOSER_DISABLE_XDEBUG_WARN=1 RUBY_VERSION=$(bundle platform --ruby | awk '{print $2}') _PHP=php70"
+                - "COMPOSER_NO_INTERACTION=1 COMPOSER_DISABLE_XDEBUG_WARN=1 RUBY_VERSION=$(bundle platform --ruby | awk '{print $2}') _PHP=php71"
 
 before_install:
     - 'src-dev/scripts/travis/before_install.sh'

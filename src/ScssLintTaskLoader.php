@@ -5,14 +5,8 @@ namespace Cheppers\Robo\ScssLint;
 use League\Container\ContainerAwareInterface;
 use Robo\Contract\OutputAwareInterface;
 
-/**
- * Class LoadTasks.
- *
- * @package Cheppers\Robo\ScssLint\Task
- */
 trait ScssLintTaskLoader
 {
-
     /**
      * Wrapper for scss-lint.
      *

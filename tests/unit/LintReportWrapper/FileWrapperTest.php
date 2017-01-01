@@ -1,21 +1,17 @@
 <?php
 
-// @codingStandardsIgnoreStart
+namespace Cheppers\Robo\ScssLint\Test\Unit\LintReportWrapper;
+
 use Cheppers\Robo\ScssLint\LintReportWrapper\FileWrapper;
 
 class FileWrapperTest extends \Codeception\Test\Unit
 {
-    // @codingStandardsIgnoreEnd
-
     /**
      * @var \UnitTester
      */
     protected $tester;
 
-    /**
-     * @return array
-     */
-    public function casesSeverityComparer()
+    public function casesSeverityComparer(): array
     {
         return [
             'u u' => [0, '?', '?'],
@@ -23,30 +19,26 @@ class FileWrapperTest extends \Codeception\Test\Unit
             'u o' => [-1, '?', 'ok'],
 
             'o o' => [0, 'ok', 'ok'],
-            'o w' => [1, 'ok', 'warning'],
-            'o e' => [1, 'ok', 'error'],
+            'o w' => [-1, 'ok', 'warning'],
+            'o e' => [-1, 'ok', 'error'],
 
-            'w o' => [-1, 'warning', 'ok'],
+            'w o' => [1, 'warning', 'ok'],
             'w w' => [0, 'warning', 'warning'],
-            'w e' => [1, 'warning', 'error'],
+            'w e' => [-1, 'warning', 'error'],
 
-            'e o' => [-1, 'error', 'ok'],
-            'e w' => [-1, 'error', 'warning'],
+            'e o' => [1, 'error', 'ok'],
+            'e w' => [1, 'error', 'warning'],
             'e e' => [0, 'error', 'error'],
         ];
     }
 
     /**
      * @dataProvider casesSeverityComparer
-     *
-     * @param int $expected
-     * @param string $a
-     * @param string $b
      */
-    public function testSeverityComparer($expected, $a, $b)
+    public function testSeverityComparer(int $expected, string $a, string $b): void
     {
         $fw = new FileWrapper([]);
-        $class = new ReflectionClass(FileWrapper::class);
+        $class = new \ReflectionClass(FileWrapper::class);
         $severityComparer = $class->getMethod('severityComparer');
         $severityComparer->setAccessible(true);
 

@@ -4,11 +4,6 @@ namespace Cheppers\Robo\ScssLint\LintReportWrapper;
 
 use Cheppers\LintReport\FailureWrapperInterface;
 
-/**
- * Class FileWrapper.
- *
- * @package Cheppers\LintReport\Wrapper\ScssLint
- */
 class FailureWrapper implements FailureWrapperInterface
 {
     /**
@@ -33,41 +28,41 @@ class FailureWrapper implements FailureWrapperInterface
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function severity()
+    public function severity(): string
     {
         return $this->failure['severity'];
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function source()
+    public function source(): string
     {
         return $this->failure['linter'];
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
-    public function line()
+    public function line(): int
     {
         return $this->failure['line'];
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
-    public function column()
+    public function column(): int
     {
         return $this->failure['column'];
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function message()
+    public function message(): string
     {
         return $this->failure['reason'];
     }

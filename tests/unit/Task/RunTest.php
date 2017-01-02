@@ -77,9 +77,22 @@ class TaskScssLintRunTest extends Unit
                 ['bundleGemFile' => 'a/b/Gemfile'],
                 [],
             ],
-            'no-bundle-exec' => [
+            'bundleExecutable-empty' => [
                 'scss-lint',
-                ['bundleExec' => false],
+                ['bundleExecutable' => ''],
+                [],
+            ],
+            'bundleExecutable-other' => [
+                'my-bundle exec scss-lint',
+                ['bundleExecutable' => 'my-bundle'],
+                [],
+            ],
+            'scssLintExecutable-other' => [
+                'my-scss-lint',
+                [
+                    'bundleExecutable' => '',
+                    'scssLintExecutable' => 'my-scss-lint',
+                ],
                 [],
             ],
             'format-empty' => [

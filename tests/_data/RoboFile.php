@@ -36,7 +36,7 @@ class RoboFile extends \Robo\Tasks
     public function lintDefaultStdOutput()
     {
         return $this->taskScssLintRun()
-            ->paths(['fixtures/'])
+            ->setPaths(['fixtures/'])
             ->setFormat('Default');
     }
 
@@ -46,7 +46,7 @@ class RoboFile extends \Robo\Tasks
     public function lintDefaultFile()
     {
         return $this->taskScssLintRun()
-            ->paths(['fixtures/'])
+            ->setPaths(['fixtures/'])
             ->setFormat('Default')
             ->setOut("{$this->reportsDir}/native.default.txt");
     }
@@ -67,7 +67,7 @@ class RoboFile extends \Robo\Tasks
             ->setDestination("{$this->reportsDir}/extra.summary.txt");
 
         return $this->taskScssLintRun()
-            ->paths(['fixtures/'])
+            ->setPaths(['fixtures/'])
             ->setFormat('JSON')
             ->setFailOn('warning')
             ->addLintReporter('verbose:StdOutput', 'lintVerboseReporter')

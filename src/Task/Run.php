@@ -107,23 +107,45 @@ class Run extends BaseTask implements
     }
     //endregion
 
-    //region Option - bundleExec.
+    //region Option - bundleExecutable.
     /**
-     * @var bool
+     * @var string
      */
-    protected $bundleExec = true;
+    protected $bundleExecutable = 'bundle';
 
-    protected function getBundleExec(): bool
+    protected function getBundleExecutable(): string
     {
-        return $this->bundleExec;
+        return $this->bundleExecutable;
     }
 
     /**
      * @return $this
      */
-    protected function setBundleExec(bool $value)
+    protected function setBundleExecutable(string $value)
     {
-        $this->bundleExec = $value;
+        $this->bundleExecutable = $value;
+
+        return $this;
+    }
+    //endregion
+
+    //region Option - scssLintExecutable.
+    /**
+     * @var string
+     */
+    protected $scssLintExecutable = 'scss-lint';
+
+    public function getScssLintExecutable(): string
+    {
+        return $this->scssLintExecutable;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setScssLintExecutable(string $scssLintExecutable)
+    {
+        $this->scssLintExecutable = $scssLintExecutable;
 
         return $this;
     }
@@ -478,7 +500,7 @@ class Run extends BaseTask implements
      *
      * @return $this
      */
-    public function paths(array $paths, bool $include = true)
+    public function setPaths(array $paths, bool $include = true)
     {
         $this->paths = $this->createIncludeList($paths, $include) + $this->paths;
 
@@ -533,7 +555,7 @@ class Run extends BaseTask implements
     public function __construct(array $options = [], array $paths = [])
     {
         $this->setOptions($options);
-        $this->paths($paths);
+        $this->setPaths($paths);
     }
 
     public function setOptions(array $options): self
@@ -552,8 +574,12 @@ class Run extends BaseTask implements
                     $this->setBundleGemFile($value);
                     break;
 
-                case 'bundleExec':
-                    $this->setBundleExec($value);
+                case 'bundleExecutable':
+                    $this->setBundleExecutable($value);
+                    break;
+
+                case 'scssLintExecutable':
+                    $this->setScssLintExecutable($value);
                     break;
 
                 case 'failOn':
@@ -597,7 +623,7 @@ class Run extends BaseTask implements
                     break;
 
                 case 'paths':
-                    $this->paths($value);
+                    $this->setPaths($value);
                     break;
             }
         }
@@ -631,11 +657,15 @@ class Run extends BaseTask implements
      */
     public function run()
     {
+        $lintReporters = $this->initLintReporters();
+        if ($lintReporters && $this->getFormat() === '') {
+            $this->setFormat('JSON');
+        }
+
         $command = $this->getCommand();
         $this->printTaskInfo(sprintf('SCSS lint task runs: <info>%s</info>', $command));
 
-        $lintReporters = $this->initLintReporters();
-        if ($lintReporters && $this->format !== 'JSON') {
+        if ($lintReporters && $this->getFormat() !== 'JSON') {
             $this->exitCode = static::EXIT_CODE_INVALID;
 
             return new Result($this, $this->exitCode, $this->getExitMessage($this->exitCode));
@@ -650,8 +680,8 @@ class Run extends BaseTask implements
         $numOfWarnings = 0;
         if ($this->isLintSuccess()) {
             $originalOutput = $process->getOutput();
-            if ($this->format === 'JSON') {
-                $jsonOutput = ($this->out ? file_get_contents($this->out) : $originalOutput);
+            if ($this->getFormat() === 'JSON') {
+                $jsonOutput = ($this->getOut() ? file_get_contents($this->getOut()) : $originalOutput);
                 $reportWrapper = new ReportWrapper(json_decode($jsonOutput, true));
 
                 $numOfErrors = $reportWrapper->numOfErrors();
@@ -701,11 +731,12 @@ class Run extends BaseTask implements
             $cmdArgs[] = escapeshellarg($this->getBundleGemFile());
         }
 
-        if ($this->getBundleExec()) {
-            $cmdPattern .= 'bundle exec ';
+        if ($this->getBundleExecutable()) {
+            $cmdPattern .= '%s exec ';
+            $cmdArgs[] = escapeshellcmd($this->getBundleExecutable());
         }
 
-        $cmdPattern .= 'scss-lint';
+        $cmdPattern .= escapeshellcmd($this->getScssLintExecutable());
 
         foreach ($options as $optionName => $optionValue) {
             switch ($this->options[$optionName]) {
@@ -820,11 +851,11 @@ class Run extends BaseTask implements
     protected function getTaskExitCode(int $numOfErrors, int $numOfWarnings): int
     {
         if ($this->exitCode === static::EXIT_CODE_NO_FILES) {
-            return ($this->failOnNoFiles ? static::EXIT_CODE_NO_FILES : static::EXIT_CODE_OK);
+            return ($this->getFailOnNoFiles() ? static::EXIT_CODE_NO_FILES : static::EXIT_CODE_OK);
         }
 
         if ($this->isLintSuccess()) {
-            switch ($this->failOn) {
+            switch ($this->getFailOn()) {
                 case 'never':
                     return static::EXIT_CODE_OK;
 

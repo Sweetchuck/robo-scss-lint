@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 
-if [[ "${TRAVIS_OS_NAME}" == 'linux' ]]; then
-    git --version
-    sudo add-apt-repository -y ppa:git-core/ppa
-    sudo apt-get update
-    sudo apt-get -y install git
-    git --version
-fi
-
 if [[ "${TRAVIS_OS_NAME}" == 'osx' ]]; then
+    ulimit -n 10000
+
     echo "Here's the OSX environment:"
     git --version
     sw_vers
@@ -32,8 +26,7 @@ if [[ "${TRAVIS_OS_NAME}" == 'osx' ]]; then
         brew tap homebrew/versions
         brew tap homebrew/homebrew-php
 
-        src-dev/scripts/osx.homebrew-install.sh "${_PHP}"
-        src-dev/scripts/osx.homebrew-install.sh "${_PHP}-xdebug"
+        src-dev/scripts/osx.homebrew-install.sh "${_PHP}" '--with-phpdbg'
     fi
 
     test -d "$HOME/bin" || mkdir "$HOME/bin"

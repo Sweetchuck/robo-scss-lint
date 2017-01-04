@@ -5,3 +5,8 @@
 [![codecov](https://codecov.io/gh/Cheppers/robo-scss-lint/branch/master/graph/badge.svg)](https://codecov.io/gh/Cheppers/robo-scss-lint)
 
 Bridge between [Robo](http://robo.li) and [scss-lint](https://rubygems.org/gems/scss_lint)
+
+
+## Install
+
+`composer require --dev cheppers/robo-scss-lint`

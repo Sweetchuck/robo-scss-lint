@@ -1,0 +1,24 @@
+invalid.01.scss
++----------+------+--------------------------------------------------------------------+
+| Severity | Line | Message                                                            |
++----------+------+--------------------------------------------------------------------+
+| warning  |    2 | Opening curly brace `{` should be preceded by one space            |
+| warning  |    2 | Colon after property should be followed by one space               |
+| warning  |    2 | Property 'display' should be placed on separate line from selector |
+| warning  |    5 | Avoid using id selectors                                           |
+| error    |    6 | Line should be indented 2 spaces, but was indented 4 spaces        |
++----------+------+--------------------------------------------------------------------+
+
+invalid.02.scss
++----------+------+----------------------------------------------------------------------+
+| Severity | Line | Message                                                              |
++----------+------+----------------------------------------------------------------------+
+| warning  |    2 | Opening curly brace `{` should be preceded by one space              |
+| warning  |    2 | Colon after property should be followed by one space                 |
+| warning  |    2 | Property 'display' should be placed on separate line from selector   |
+| warning  |    5 | Avoid using id selectors                                             |
+| warning  |    5 | Opening curly brace `{` should be preceded by one space              |
+| warning  |    6 | Declaration should not have a space before the terminating semicolon |
+| error    |    6 | Line should be indented 2 spaces, but was indented 0 spaces          |
+| warning  |    6 | Colon after property should be followed by one space                 |
++----------+------+----------------------------------------------------------------------+

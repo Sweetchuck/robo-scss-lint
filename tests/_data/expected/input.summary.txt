@@ -1,0 +1,22 @@
+invalid.01.scss
++-------------------------+-------------+
+| Source                  | Occurrences |
++-------------------------+-------------+
+| SpaceBeforeBrace        |           1 |
+| SpaceAfterPropertyColon |           1 |
+| SingleLinePerProperty   |           1 |
+| IdSelector              |           1 |
+| Indentation             |           1 |
++-------------------------+-------------+
+
+invalid.02.scss
++-------------------------+-------------+
+| Source                  | Occurrences |
++-------------------------+-------------+
+| SpaceBeforeBrace        |           2 |
+| SpaceAfterPropertyColon |           2 |
+| SingleLinePerProperty   |           1 |
+| IdSelector              |           1 |
+| TrailingSemicolon       |           1 |
+| Indentation             |           1 |
++-------------------------+-------------+

@@ -4,14 +4,14 @@ namespace Cheppers\Robo\ScssLint\Test\Unit\Task;
 
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\VerboseReporter;
-use Cheppers\Robo\ScssLint\Task\Run as Task;
+use Cheppers\Robo\ScssLint\Task\ScssLintRunFiles as Task;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use Helper\Dummy\Output as DummyOutput;
 use Helper\Dummy\Process as DummyProcess;
 use Robo\Robo;
 
-class TaskScssLintRunTest extends Unit
+class ScssLintRunFilesTest extends Unit
 {
     protected static function getMethod(string $name): \ReflectionMethod
     {
@@ -65,27 +65,22 @@ class TaskScssLintRunTest extends Unit
             'basic' => [
                 'bundle exec scss-lint',
                 [],
-                [],
             ],
             'working-directory' => [
                 "cd 'my-dir' && bundle exec scss-lint",
                 ['workingDirectory' => 'my-dir'],
-                [],
             ],
             'bundle-gem-file' => [
                 "BUNDLE_GEMFILE='a/b/Gemfile' bundle exec scss-lint",
                 ['bundleGemFile' => 'a/b/Gemfile'],
-                [],
             ],
             'bundleExecutable-empty' => [
                 'scss-lint',
                 ['bundleExecutable' => ''],
-                [],
             ],
             'bundleExecutable-other' => [
                 'my-bundle exec scss-lint',
                 ['bundleExecutable' => 'my-bundle'],
-                [],
             ],
             'scssLintExecutable-other' => [
                 'my-scss-lint',
@@ -93,27 +88,22 @@ class TaskScssLintRunTest extends Unit
                     'bundleExecutable' => '',
                     'scssLintExecutable' => 'my-scss-lint',
                 ],
-                [],
             ],
             'format-empty' => [
                 'bundle exec scss-lint',
                 ['format' => ''],
-                [],
             ],
             'format-foo' => [
                 "bundle exec scss-lint --format='foo'",
                 ['format' => 'foo'],
-                [],
             ],
             'require-string' => [
                 "bundle exec scss-lint --require='foo'",
                 ['require' => 'foo'],
-                [],
             ],
             'require-vector' => [
                 "bundle exec scss-lint --require='foo' --require='bar' --require='baz'",
                 ['require' => ['foo', 'bar', 'baz']],
-                [],
             ],
             'require-assoc' => [
                 "bundle exec scss-lint --require='foo' --require='baz'",
@@ -123,12 +113,10 @@ class TaskScssLintRunTest extends Unit
             'linters-string' => [
                 "bundle exec scss-lint --include-linter='foo'",
                 ['linters' => 'foo'],
-                [],
             ],
             'linters-vector' => [
                 "bundle exec scss-lint --include-linter='foo,bar,baz'",
                 ['linters' => ['foo', 'bar', 'baz']],
-                [],
             ],
             'linters-assoc' => [
                 "bundle exec scss-lint --include-linter='a,d' --exclude-linter='c,e'",
@@ -141,27 +129,22 @@ class TaskScssLintRunTest extends Unit
                         'e' => false,
                     ]
                 ],
-                [],
             ],
             'config-false' => [
                 "bundle exec scss-lint",
                 ['configFile' => false],
-                [],
             ],
             'config-string' => [
                 "bundle exec scss-lint --config='foo'",
                 ['configFile' => 'foo'],
-                [],
             ],
             'exclude-string' => [
                 "bundle exec scss-lint --exclude='foo'",
                 ['exclude' => 'foo'],
-                [],
             ],
             'exclude-vector' => [
                 "bundle exec scss-lint --exclude='foo,bar,baz'",
                 ['exclude' => ['foo', 'bar', 'baz']],
-                [],
             ],
             'exclude-assoc' => [
                 "bundle exec scss-lint --exclude='a,d'",
@@ -174,37 +157,30 @@ class TaskScssLintRunTest extends Unit
                         'e' => false,
                     ]
                 ],
-                [],
             ],
             'out-false' => [
                 "bundle exec scss-lint",
                 ['out' => false],
-                [],
             ],
             'out-foo' => [
                 "bundle exec scss-lint --out='foo'",
                 ['out' => 'foo'],
-                [],
             ],
             'color-true' => [
                 "bundle exec scss-lint --color",
                 ['color' => true],
-                [],
             ],
             'color-null' => [
                 "bundle exec scss-lint",
                 ['color' => null],
-                [],
             ],
             'color-false' => [
                 "bundle exec scss-lint --no-color",
                 ['color' => false],
-                [],
             ],
             'paths-vector' => [
                 "bundle exec scss-lint -- 'foo' 'bar' 'baz'",
                 ['paths' => ['foo', 'bar', 'baz']],
-                [],
             ],
             'paths-assoc' => [
                 "bundle exec scss-lint -- 'a' 'd'",
@@ -217,7 +193,6 @@ class TaskScssLintRunTest extends Unit
                         'e' => false,
                     ]
                 ],
-                [],
             ],
         ];
     }
@@ -225,9 +200,9 @@ class TaskScssLintRunTest extends Unit
     /**
      * @dataProvider casesGetCommand
      */
-    public function testGetCommand(string $expected, array $options, array $paths): void
+    public function testGetCommand(string $expected, array $options): void
     {
-        $task = new Task($options, $paths);
+        $task = new Task($options);
         $this->tester->assertEquals($expected, $task->getCommand());
     }
 
@@ -328,13 +303,13 @@ class TaskScssLintRunTest extends Unit
         bool $failOnNoFiles,
         int $numOfErrors,
         int $numOfWarnings,
-        int $exitCode
+        int $lintExitCode
     ): void {
         /** @var Task $task */
         $task = Stub::construct(
             Task::class,
             [['failOn' => $failOn, 'failOnNoFiles' => $failOnNoFiles]],
-            ['exitCode' => $exitCode]
+            ['lintExitCode' => $lintExitCode]
         );
 
         $this->tester->assertEquals(
@@ -435,7 +410,7 @@ class TaskScssLintRunTest extends Unit
             'failOnNoFiles' => false,
         ];
 
-        /** @var \Cheppers\Robo\ScssLint\Task\Run $task */
+        /** @var \Cheppers\Robo\ScssLint\Task\ScssLintRun $task */
         $task = Stub::construct(
             Task::class,
             [$options, []],

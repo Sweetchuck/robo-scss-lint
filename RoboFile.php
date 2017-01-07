@@ -195,14 +195,9 @@ class RoboFile extends \Robo\Tasks
         $logDir = $this->getLogDir();
 
         $cmdArgs = [];
-        if ($this->isPhpDbgAvailable() && !$this->isPhpExtensionAvailable('xdebug')) {
-            $cmdPattern = '%s -qrr %s';
-            $cmdArgs[] = escapeshellcmd($this->phpdbgExecutable);
-            $cmdArgs[] = escapeshellarg("{$this->binDir}/codecept");
-        } else {
-            $cmdPattern = '%s';
-            $cmdArgs[] = escapeshellcmd("{$this->binDir}/codecept");
-        }
+        $cmdPattern = '%s -qrr %s';
+        $cmdArgs[] = escapeshellcmd($this->phpdbgExecutable);
+        $cmdArgs[] = escapeshellarg("{$this->binDir}/codecept");
 
         $cmdPattern .= ' --ansi';
         $cmdPattern .= ' --verbose';
@@ -249,9 +244,6 @@ class RoboFile extends \Robo\Tasks
             ->addTaskList($tasks);
     }
 
-    /**
-     * @return \Cheppers\Robo\Phpcs\Task\PhpcsLintFiles|\Robo\Collection\CollectionBuilder
-     */
     protected function getTaskPhpcsLint(): CollectionBuilder
     {
         $env = $this->getEnvironment();
@@ -313,17 +305,6 @@ class RoboFile extends \Robo\Tasks
         }
 
         return in_array($extension, explode("\n", $process->getOutput()));
-    }
-
-    protected function isPhpDbgAvailable(): bool
-    {
-        $command = sprintf(
-            '%s -i | grep -- %s',
-            escapeshellcmd($this->phpExecutable),
-            escapeshellarg('--enable-phpdbg')
-        );
-
-        return (new Process($command))->run() === 0;
     }
 
     protected function getLogDir(): string

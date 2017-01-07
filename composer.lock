@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "0d079d1deb90f44deba83c2f6283c0dd",
-    "content-hash": "fedf295b2facfab714b5891b1759e7b2",
+    "hash": "89ea81a99aaf677195eb597cbc79d869",
+    "content-hash": "060d6d9117c894499c1afe9e00d105d9",
     "packages": [
         {
             "name": "cheppers/asset-jar",
@@ -38,6 +38,44 @@
             ],
             "description": "Provides a very simple, shared, in-memory data storage.",
             "time": "2016-07-30 09:09:38"
+        },
+        {
+            "name": "cheppers/lint-report",
+            "version": "v0.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Cheppers/lint-report.git",
+                "reference": "adc7536bea7df3fa8de378e0dff5dcbb9b644af8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Cheppers/lint-report/zipball/adc7536bea7df3fa8de378e0dff5dcbb9b644af8",
+                "reference": "adc7536bea7df3fa8de378e0dff5dcbb9b644af8",
+                "shasum": ""
+            },
+            "require": {
+                "league/container": "^2.2",
+                "symfony/console": "^2.8 || ^3.1",
+                "symfony/filesystem": "^2.8 || ^3.1",
+                "symfony/yaml": "^2.8 || ^3.1"
+            },
+            "require-dev": {
+                "cheppers/git-hooks": "^0.0.8",
+                "codeception/codeception": "^2.2",
+                "squizlabs/php_codesniffer": "2.6.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cheppers\\LintReport\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "description": "Generate reports from lint results",
+            "time": "2016-12-14 21:09:07"
         },
         {
             "name": "consolidation/annotated-command",
@@ -935,6 +973,61 @@
             "time": "2016-11-24 10:40:28"
         },
         {
+            "name": "symfony/yaml",
+            "version": "v3.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/yaml.git",
+                "reference": "a7095af4b97a0955f85c8989106c249fa649011f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/a7095af4b97a0955f85c8989106c249fa649011f",
+                "reference": "a7095af4b97a0955f85c8989106c249fa649011f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.9"
+            },
+            "require-dev": {
+                "symfony/console": "~2.8|~3.0"
+            },
+            "suggest": {
+                "symfony/console": "For validating YAML files using the lint command"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Yaml\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Yaml Component",
+            "homepage": "https://symfony.com",
+            "time": "2016-12-10 10:07:06"
+        },
+        {
             "name": "victorjonsson/markdowndocs",
             "version": "1.3.7",
             "source": {
@@ -1129,44 +1222,6 @@
             ],
             "description": "Provide a bridge between Git hooks and scripts under VCS.",
             "time": "2016-10-15 10:06:14"
-        },
-        {
-            "name": "cheppers/lint-report",
-            "version": "v0.0.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Cheppers/lint-report.git",
-                "reference": "adc7536bea7df3fa8de378e0dff5dcbb9b644af8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Cheppers/lint-report/zipball/adc7536bea7df3fa8de378e0dff5dcbb9b644af8",
-                "reference": "adc7536bea7df3fa8de378e0dff5dcbb9b644af8",
-                "shasum": ""
-            },
-            "require": {
-                "league/container": "^2.2",
-                "symfony/console": "^2.8 || ^3.1",
-                "symfony/filesystem": "^2.8 || ^3.1",
-                "symfony/yaml": "^2.8 || ^3.1"
-            },
-            "require-dev": {
-                "cheppers/git-hooks": "^0.0.8",
-                "codeception/codeception": "^2.2",
-                "squizlabs/php_codesniffer": "2.6.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Cheppers\\LintReport\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-2.0+"
-            ],
-            "description": "Generate reports from lint results",
-            "time": "2016-12-14 21:09:07"
         },
         {
             "name": "cheppers/robo-git",
@@ -2903,61 +2958,6 @@
             "description": "Symfony DomCrawler Component",
             "homepage": "https://symfony.com",
             "time": "2016-12-10 14:24:53"
-        },
-        {
-            "name": "symfony/yaml",
-            "version": "v3.2.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/yaml.git",
-                "reference": "a7095af4b97a0955f85c8989106c249fa649011f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/a7095af4b97a0955f85c8989106c249fa649011f",
-                "reference": "a7095af4b97a0955f85c8989106c249fa649011f",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.5.9"
-            },
-            "require-dev": {
-                "symfony/console": "~2.8|~3.0"
-            },
-            "suggest": {
-                "symfony/console": "For validating YAML files using the lint command"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.2-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\Yaml\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony Yaml Component",
-            "homepage": "https://symfony.com",
-            "time": "2016-12-10 10:07:06"
         }
     ],
     "aliases": [],

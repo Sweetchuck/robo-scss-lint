@@ -6,6 +6,7 @@ use Cheppers\AssetJar\AssetJarAware;
 use Cheppers\AssetJar\AssetJarAwareInterface;
 use Cheppers\LintReport\ReporterInterface;
 use Cheppers\Robo\ScssLint\LintReportWrapper\ReportWrapper;
+use Cheppers\Robo\ScssLint\Utils;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Robo\Common\BuilderAwareTrait;
@@ -17,7 +18,7 @@ use Robo\Result;
 use Robo\Task\BaseTask;
 use Symfony\Component\Process\Process;
 
-class Run extends BaseTask implements
+class ScssLintRun extends BaseTask implements
     AssetJarAwareInterface,
     CommandInterface,
     ContainerAwareInterface,
@@ -45,6 +46,8 @@ class Run extends BaseTask implements
     const EXIT_CODE_ERROR = 2;
 
     const EXIT_CODE_INVALID = 3;
+
+    const EXIT_CODE_UNKNOWN = 4;
 
     /**
      * No SCSS files matched by the patterns.
@@ -495,14 +498,12 @@ class Run extends BaseTask implements
      *
      * @param string|string[]|bool[] $paths
      *   Key-value pair of file names and boolean.
-     * @param bool $include
-     *   Exclude or include the files in $paths.
      *
      * @return $this
      */
-    public function setPaths(array $paths, bool $include = true)
+    public function setPaths(array $paths)
     {
-        $this->paths = $this->createIncludeList($paths, $include) + $this->paths;
+        $this->paths = $paths;
 
         return $this;
     }
@@ -524,7 +525,37 @@ class Run extends BaseTask implements
      *
      * @var int
      */
-    protected $exitCode = 0;
+    protected $lintExitCode = 0;
+
+    /**
+     * @var string
+     */
+    protected $lintStdOutput = '';
+
+    /**
+     * @var bool
+     */
+    protected $isLintStdOutputPublic = true;
+
+    /**
+     * @var string
+     */
+    protected $reportRaw = '';
+
+    /**
+     * @var bool
+     */
+    protected $addFilesToCliCommand = true;
+
+    /**
+     * @var array
+     */
+    protected $report = [];
+
+    /**
+     * @var \Cheppers\LintReport\ReportWrapperInterface
+     */
+    protected $reportWrapper = null;
 
     /**
      * Exit code and error message mapping.
@@ -544,23 +575,18 @@ class Run extends BaseTask implements
         80 => 'Files glob patterns specified did not match any files.',
     ];
 
-    /**
-     * TaskScssLintRun constructor.
-     *
-     * @param array $options
-     *   Key-value pairs of options.
-     * @param array $paths
-     *   File paths.
-     */
-    public function __construct(array $options = [], array $paths = [])
+    public function __construct(array $options = [])
     {
         $this->setOptions($options);
-        $this->setPaths($paths);
     }
 
-    public function setOptions(array $options): self
+    /**
+     * @return $this
+     */
+    public function setOptions(array $options)
     {
         foreach ($options as $name => $value) {
+            // @codingStandardsIgnoreStart
             switch ($name) {
                 case 'assetJarMapping':
                     $this->setAssetJarMapping($value);
@@ -626,6 +652,7 @@ class Run extends BaseTask implements
                     $this->setPaths($value);
                     break;
             }
+            // @codingStandardsIgnoreEnd
         }
 
         return $this;
@@ -662,53 +689,121 @@ class Run extends BaseTask implements
             $this->setFormat('JSON');
         }
 
-        $command = $this->getCommand();
-        $this->printTaskInfo(sprintf('SCSS lint task runs: <info>%s</info>', $command));
-
         if ($lintReporters && $this->getFormat() !== 'JSON') {
-            $this->exitCode = static::EXIT_CODE_INVALID;
-
-            return new Result($this, $this->exitCode, $this->getExitMessage($this->exitCode));
+            return new Result(
+                $this,
+                static::EXIT_CODE_INVALID,
+                $this->getExitMessage(static::EXIT_CODE_INVALID)
+            );
         }
+
+        return $this
+            ->runHeader()
+            ->runLint()
+            ->runReleaseLintReports()
+            ->runReleaseAssets()
+            ->runReturn();
+    }
+
+    /**
+     * @return $this
+     */
+    protected function runHeader()
+    {
+        $this->printTaskInfo('', null);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function runLint()
+    {
+        $this->reportRaw = '';
+        $this->report = [];
+        $this->reportWrapper = null;
+        $this->lintExitCode = static::EXIT_CODE_OK;
 
         /** @var Process $process */
-        $process = new $this->processClass($command);
+        $process = new $this->processClass($this->getCommand());
 
-        $this->exitCode = $process->run();
+        $this->lintExitCode = $process->run();
+        $this->lintStdOutput = $process->getOutput();
 
-        $numOfErrors = $this->exitCode;
-        $numOfWarnings = 0;
-        if ($this->isLintSuccess()) {
-            $originalOutput = $process->getOutput();
-            if ($this->getFormat() === 'JSON') {
-                $jsonOutput = ($this->getOut() ? file_get_contents($this->getOut()) : $originalOutput);
-                $reportWrapper = new ReportWrapper(json_decode($jsonOutput, true));
-
-                $numOfErrors = $reportWrapper->numOfErrors();
-                $numOfWarnings = $reportWrapper->numOfWarnings();
-
-                if ($this->isReportHasToBePutBackIntoJar()) {
-                    $this->setAssetJarValue('report', $reportWrapper);
-                }
-
-                foreach ($lintReporters as $lintReporter) {
-                    $lintReporter
-                        ->setReportWrapper($reportWrapper)
-                        ->generate();
-                }
-            }
-
-            if (!$lintReporters) {
-                $this->output()->write($originalOutput);
+        if ($this->isLintSuccess() && $this->getFormat() === 'JSON') {
+            $out = $this->getOut();
+            if (!$out) {
+                $this->reportRaw = $this->lintStdOutput;
+            } elseif (is_readable($out)) {
+                $this->reportRaw = file_get_contents($out);
             }
         }
 
-        $exitCode = $this->getTaskExitCode($numOfErrors, $numOfWarnings);
+        if ($this->reportRaw) {
+            // @todo Pray for a valid JSON output.
+            $this->report = (array) json_decode($this->reportRaw, true);
+            $this->reportWrapper = new ReportWrapper($this->report);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function runReleaseLintReports()
+    {
+        if ($this->isLintStdOutputPublic) {
+            $this->output()->write($this->lintStdOutput);
+        }
+
+        if ($this->reportWrapper) {
+            foreach ($this->initLintReporters() as $lintReporter) {
+                $lintReporter
+                    ->setReportWrapper($this->reportWrapper)
+                    ->generate();
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function runReleaseAssets()
+    {
+        if ($this->isLintSuccess() && $this->hasAssetJar()) {
+            if ($this->getAssetJarMap('workingDirectory')) {
+                $this->setAssetJarValue('workingDirectory', $this->getWorkingDirectory());
+            }
+
+            if ($this->getAssetJarMap('report')) {
+                $this->setAssetJarValue('report', $this->reportWrapper);
+            }
+        }
+
+        return $this;
+    }
+
+    protected function runReturn(): Result
+    {
+        $exitCode = $this->reportWrapper ?
+            $this->getTaskExitCode(
+                $this->reportWrapper->numOfErrors(),
+                $this->reportWrapper->numOfWarnings()
+            )
+            : $this->lintExitCode;
 
         return new Result(
             $this,
             $exitCode,
-            $this->getExitMessage($exitCode) ?: $process->getErrorOutput()
+            $this->getExitMessage($exitCode),
+            [
+                'workingDirectory' => $this->getWorkingDirectory(),
+                'report' => $this->reportWrapper,
+            ]
         );
     }
 
@@ -781,11 +876,13 @@ class Run extends BaseTask implements
             }
         }
 
-        $paths = array_keys($this->getPaths(), true, true);
-        if ($paths) {
-            $cmdPattern .= ' --' . str_repeat(' %s', count($paths));
-            foreach ($paths as $path) {
-                $cmdArgs[] = escapeshellarg($path);
+        if ($this->addFilesToCliCommand) {
+            $paths = Utils::filterEnabled($this->getPaths());
+            if ($paths) {
+                $cmdPattern .= ' --' . str_repeat(' %s', count($paths));
+                foreach ($paths as $path) {
+                    $cmdArgs[] = escapeshellarg($path);
+                }
             }
         }
 
@@ -805,31 +902,22 @@ class Run extends BaseTask implements
         ];
     }
 
-    protected function isReportHasToBePutBackIntoJar(): bool
-    {
-        return (
-            $this->hasAssetJar()
-            && $this->getAssetJarMap('report')
-            && $this->isLintSuccess()
-        );
-    }
-
     /**
      * @return \Cheppers\LintReport\ReporterInterface[]
      */
     protected function initLintReporters(): array
     {
         $lintReporters = [];
-        $c = $this->getContainer();
+        $container = $this->getContainer();
         foreach ($this->getLintReporters() as $id => $lintReporter) {
             if ($lintReporter === false) {
                 continue;
             }
 
             if (!$lintReporter) {
-                $lintReporter = $c->get($id);
+                $lintReporter = $container->get($id);
             } elseif (is_string($lintReporter)) {
-                $lintReporter = $c->get($lintReporter);
+                $lintReporter = $container->get($lintReporter);
             }
 
             if ($lintReporter instanceof ReporterInterface) {
@@ -850,7 +938,7 @@ class Run extends BaseTask implements
      */
     protected function getTaskExitCode(int $numOfErrors, int $numOfWarnings): int
     {
-        if ($this->exitCode === static::EXIT_CODE_NO_FILES) {
+        if ($this->lintExitCode === static::EXIT_CODE_NO_FILES) {
             return ($this->getFailOnNoFiles() ? static::EXIT_CODE_NO_FILES : static::EXIT_CODE_OK);
         }
 
@@ -871,7 +959,7 @@ class Run extends BaseTask implements
             }
         }
 
-        return $this->exitCode;
+        return $this->lintExitCode;
     }
 
     protected function getExitMessage(int $exitCode): ?string
@@ -890,7 +978,7 @@ class Run extends BaseTask implements
      */
     protected function isLintSuccess(): bool
     {
-        return in_array($this->exitCode, $this->lintSuccessExitCodes());
+        return in_array($this->lintExitCode, $this->lintSuccessExitCodes());
     }
 
     /**
@@ -904,5 +992,21 @@ class Run extends BaseTask implements
             static::EXIT_CODE_WARNING,
             static::EXIT_CODE_ERROR,
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function printTaskInfo($text, $context = null)
+    {
+        parent::printTaskInfo($text ?: $this->getTaskInfoPattern(), $context);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getTaskInfoPattern()
+    {
+        return "{name} is linting files";
     }
 }

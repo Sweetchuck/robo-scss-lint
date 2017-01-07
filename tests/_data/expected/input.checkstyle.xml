@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="2.6.1">
+  <file name="invalid.01.scss">
+    <error severity="warning" source="SpaceBeforeBrace" line="2" column="1" message="Opening curly brace `{` should be preceded by one space"/>
+    <error severity="warning" source="SpaceAfterPropertyColon" line="2" column="6" message="Colon after property should be followed by one space"/>
+    <error severity="warning" source="SingleLinePerProperty" line="2" column="6" message="Property 'display' should be placed on separate line from selector"/>
+    <error severity="warning" source="IdSelector" line="5" column="1" message="Avoid using id selectors"/>
+    <error severity="error" source="Indentation" line="6" column="1" message="Line should be indented 2 spaces, but was indented 4 spaces"/>
+  </file>
+  <file name="invalid.02.scss">
+    <error severity="warning" source="SpaceBeforeBrace" line="2" column="1" message="Opening curly brace `{` should be preceded by one space"/>
+    <error severity="warning" source="SpaceAfterPropertyColon" line="2" column="6" message="Colon after property should be followed by one space"/>
+    <error severity="warning" source="SingleLinePerProperty" line="2" column="6" message="Property 'display' should be placed on separate line from selector"/>
+    <error severity="warning" source="IdSelector" line="5" column="1" message="Avoid using id selectors"/>
+    <error severity="warning" source="SpaceBeforeBrace" line="5" column="1" message="Opening curly brace `{` should be preceded by one space"/>
+    <error severity="warning" source="TrailingSemicolon" line="6" column="1" message="Declaration should not have a space before the terminating semicolon"/>
+    <error severity="error" source="Indentation" line="6" column="1" message="Line should be indented 2 spaces, but was indented 0 spaces"/>
+    <error severity="warning" source="SpaceAfterPropertyColon" line="6" column="1" message="Colon after property should be followed by one space"/>
+  </file>
+</checkstyle>

@@ -1,5 +1,5 @@
-fixtures/invalid.scss:2:1 [W] SpaceBeforeBrace: Opening curly brace `{` should be preceded by one space
-fixtures/invalid.scss:2:6 [W] SingleLinePerProperty: Property 'display' should be placed on separate line from selector
-fixtures/invalid.scss:2:6 [W] SpaceAfterPropertyColon: Colon after property should be followed by one space
-fixtures/invalid.scss:5:1 [W] IdSelector: Avoid using id selectors
-fixtures/invalid.scss:6:1 [E] Indentation: Line should be indented 2 spaces, but was indented 4 spaces
+fixtures/invalid.01.scss:2:1 [W] SpaceBeforeBrace: Opening curly brace `{` should be preceded by one space
+fixtures/invalid.01.scss:2:6 [W] SingleLinePerProperty: Property 'display' should be placed on separate line from selector
+fixtures/invalid.01.scss:2:6 [W] SpaceAfterPropertyColon: Colon after property should be followed by one space
+fixtures/invalid.01.scss:5:1 [W] IdSelector: Avoid using id selectors
+fixtures/invalid.01.scss:6:1 [E] Indentation: Line should be indented 2 spaces, but was indented 4 spaces

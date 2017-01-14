@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Test\Unit\Task;
+namespace Cheppers\Robo\ScssLint\Tests\Unit\Task;
 
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\LintReport\Reporter\VerboseReporter;
@@ -489,7 +489,7 @@ class ScssLintRunFilesTest extends Unit
 
         $this->assertEquals(3, $result->getExitCode());
         $this->assertEquals(
-            'Extra lint reporters can be used only if the output format is "json".',
+            'Extra lint reporters can be used only if the output format is "JSON".',
             $result->getMessage()
         );
     }

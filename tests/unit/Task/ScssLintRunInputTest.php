@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Test\Unit\Task;
+namespace Cheppers\Robo\ScssLint\Tests\Unit\Task;
 
 use Cheppers\AssetJar\AssetJar;
 use Cheppers\Robo\ScssLint\Task\ScssLintRunInput as Task;

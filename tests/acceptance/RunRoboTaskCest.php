@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Test\Acceptance;
+namespace Cheppers\Robo\ScssLint\Tests\Acceptance;
 
 use AcceptanceTester;
 

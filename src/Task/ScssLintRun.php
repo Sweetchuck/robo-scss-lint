@@ -540,6 +540,11 @@ class ScssLintRun extends BaseTask implements
     /**
      * @var string
      */
+    protected $machineReadableFormat = 'JSON';
+
+    /**
+     * @var string
+     */
     protected $reportRaw = '';
 
     /**
@@ -566,7 +571,7 @@ class ScssLintRun extends BaseTask implements
         0 => 'No lints were found',
         1 => 'Lints with a severity of warning were reported (no errors)',
         2 => 'One or more errors were reported (and any number of warnings)',
-        3 => 'Extra lint reporters can be used only if the output format is "json".',
+        3 => 'Extra lint reporters can be used only if the output format is "JSON".',
         64 => 'Command line usage error (invalid flag, etc.)',
         66 => 'One or more files specified were not found',
         69 => 'Required library specified via -r/--require flag was not found',
@@ -686,10 +691,11 @@ class ScssLintRun extends BaseTask implements
     {
         $lintReporters = $this->initLintReporters();
         if ($lintReporters && $this->getFormat() === '') {
-            $this->setFormat('JSON');
+            $this->isLintStdOutputPublic = false;
+            $this->setFormat($this->machineReadableFormat);
         }
 
-        if ($lintReporters && $this->getFormat() !== 'JSON') {
+        if ($lintReporters && $this->getFormat() !== $this->machineReadableFormat) {
             return new Result(
                 $this,
                 static::EXIT_CODE_INVALID,
@@ -731,7 +737,7 @@ class ScssLintRun extends BaseTask implements
         $this->lintExitCode = $process->run();
         $this->lintStdOutput = $process->getOutput();
 
-        if ($this->isLintSuccess() && $this->getFormat() === 'JSON') {
+        if ($this->isLintSuccess() && $this->getFormat() === $this->machineReadableFormat) {
             $out = $this->getOut();
             if (!$out) {
                 $this->reportRaw = $this->lintStdOutput;

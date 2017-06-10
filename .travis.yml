@@ -12,15 +12,16 @@ matrix:
             sudo: false
             language: 'php'
             php: '7.1'
-            env:
-                - "COMPOSER_NO_INTERACTION=1 COMPOSER_DISABLE_XDEBUG_WARN=1 RUBY_VERSION=$(bundle platform --ruby | awk '{print $2}')"
-        -
-            os: 'osx'
-            language: 'generic'
-            env:
-                - "COMPOSER_NO_INTERACTION=1 COMPOSER_DISABLE_XDEBUG_WARN=1 RUBY_VERSION=$(bundle platform --ruby | awk '{print $2}') BREW_PHP=php71"
+#        -
+#            os: 'osx'
+#            language: 'generic'
+#            env:
+#                - 'BREW_PHP=php71'
 
 before_install:
+    - 'export COMPOSER_NO_INTERACTION=1'
+    - 'export COMPOSER_DISABLE_XDEBUG_WARN=1'
+    - "export RUBY_VERSION=$(bundle platform --ruby | awk '{print $2}')"
     - 'src-dev/scripts/travis/before_install.sh'
 
 install:
@@ -30,8 +31,8 @@ install:
     - 'composer install'
 
 script:
-    - './bin/robo --ansi lint'
-    - './bin/robo --ansi test'
+    - './bin/robo lint'
+    - './bin/robo test'
 
 after_success:
     - 'bash <(curl -s https://codecov.io/bash)'

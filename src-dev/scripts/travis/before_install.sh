@@ -26,6 +26,8 @@ if [[ "${TRAVIS_OS_NAME}" == 'osx' ]]; then
 
         src-dev/scripts/osx.homebrew-install.sh "${BREW_PHP}"
         src-dev/scripts/osx.homebrew-install.sh "${BREW_PHP}-xdebug"
+        php -v
+        php -m
     fi
 
     test -d "$HOME/bin" || mkdir "$HOME/bin"

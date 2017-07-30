@@ -13,7 +13,7 @@ trait ScssLintTaskLoader
      * @param array $options
      *   Key-value pairs of options.
      *
-     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles|\Robo\Collection\CollectionBuilder
      *   A lint runner task instance.
      */
     protected function taskScssLintRunFiles(array $options = [])
@@ -37,7 +37,7 @@ trait ScssLintTaskLoader
      * @param array $options
      *   Key-value pairs of options.
      *
-     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput|\Robo\Collection\CollectionBuilder
      *   A lint runner task instance.
      */
     protected function taskScssLintRunInput(array $options = [])

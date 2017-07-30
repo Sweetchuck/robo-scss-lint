@@ -6,9 +6,10 @@ use Sweetchuck\LintReport\Reporter\VerboseReporter;
 use Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles as Task;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
-use Sweetchuck\Robo\ScssLint\Test\Helper\Dummy\Output as DummyOutput;
+use Sweetchuck\Codeception\Module\RoboTaskRunner\DummyOutput;
 use Sweetchuck\Robo\ScssLint\Test\Helper\Dummy\Process as DummyProcess;
 use Robo\Robo;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class ScssLintRunFilesTest extends Unit
 {
@@ -395,7 +396,11 @@ class ScssLintRunFilesTest extends Unit
         $container = Robo::createDefaultContainer();
         Robo::setContainer($container);
 
-        $mainStdOutput = new DummyOutput();
+        $outputConfig = [
+            'verbosity' => OutputInterface::VERBOSITY_DEBUG,
+            'colors' => false,
+        ];
+        $mainStdOutput = new DummyOutput($outputConfig);
 
         $options += [
             'workingDirectory' => 'my-working-dir',
@@ -418,6 +423,7 @@ class ScssLintRunFilesTest extends Unit
         DummyProcess::$prophecy[$processIndex] = [
             'exitCode' => $exitCode,
             'stdOutput' => $expectedStdOutput,
+            'stdError' => '',
         ];
 
         $task->setLogger($container->get('logger'));

@@ -1,5 +1,6 @@
 <?php
 
+namespace Sweetchuck\Robo\ScssLint\Test;
 
 /**
  * Inherited Methods

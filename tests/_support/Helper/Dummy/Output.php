@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper\Dummy;
+namespace Sweetchuck\Robo\ScssLint\Test\Helper\Dummy;
 
 class Output extends \Symfony\Component\Console\Output\Output
 {

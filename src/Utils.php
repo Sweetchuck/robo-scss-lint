@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint;
+namespace Sweetchuck\Robo\ScssLint;
 
 class Utils
 {

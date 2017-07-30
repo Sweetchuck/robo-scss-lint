@@ -1,12 +1,12 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Task;
+namespace Sweetchuck\Robo\ScssLint\Task;
 
-use Cheppers\AssetJar\AssetJarAware;
-use Cheppers\AssetJar\AssetJarAwareInterface;
-use Cheppers\LintReport\ReporterInterface;
-use Cheppers\Robo\ScssLint\LintReportWrapper\ReportWrapper;
-use Cheppers\Robo\ScssLint\Utils;
+use Sweetchuck\AssetJar\AssetJarAware;
+use Sweetchuck\AssetJar\AssetJarAwareInterface;
+use Sweetchuck\LintReport\ReporterInterface;
+use Sweetchuck\Robo\ScssLint\LintReportWrapper\ReportWrapper;
+use Sweetchuck\Robo\ScssLint\Utils;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
 use Robo\Common\BuilderAwareTrait;
@@ -211,12 +211,12 @@ class ScssLintRun extends BaseTask implements
 
     //region Option - lintReporters.
     /**
-     * @var \Cheppers\LintReport\ReporterInterface[]
+     * @var \Sweetchuck\LintReport\ReporterInterface[]
      */
     protected $lintReporters = [];
 
     /**
-     * @return \Cheppers\LintReport\ReporterInterface[]
+     * @return \Sweetchuck\LintReport\ReporterInterface[]
      */
     public function getLintReporters(): array
     {
@@ -237,7 +237,7 @@ class ScssLintRun extends BaseTask implements
 
     /**
      * @param string $id
-     * @param string|\Cheppers\LintReport\ReporterInterface $lintReporter
+     * @param string|\Sweetchuck\LintReport\ReporterInterface $lintReporter
      *
      * @return $this
      */
@@ -558,7 +558,7 @@ class ScssLintRun extends BaseTask implements
     protected $report = [];
 
     /**
-     * @var \Cheppers\LintReport\ReportWrapperInterface
+     * @var \Sweetchuck\LintReport\ReportWrapperInterface
      */
     protected $reportWrapper = null;
 
@@ -909,7 +909,7 @@ class ScssLintRun extends BaseTask implements
     }
 
     /**
-     * @return \Cheppers\LintReport\ReporterInterface[]
+     * @return \Sweetchuck\LintReport\ReporterInterface[]
      */
     protected function initLintReporters(): array
     {

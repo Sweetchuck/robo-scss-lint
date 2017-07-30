@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\LintReportWrapper;
+namespace Sweetchuck\Robo\ScssLint\LintReportWrapper;
 
-use Cheppers\LintReport\ReportWrapperInterface;
+use Sweetchuck\LintReport\ReportWrapperInterface;
 
 class ReportWrapper implements ReportWrapperInterface
 {
@@ -78,7 +78,7 @@ class ReportWrapper implements ReportWrapperInterface
     /**
      * {@inheritdoc}
      */
-    public function setReport($report)
+    public function setReport(array $report)
     {
         $this->report = $report;
         $this->reportInternal = [];

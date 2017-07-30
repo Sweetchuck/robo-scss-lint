@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\LintReportWrapper;
+namespace Sweetchuck\Robo\ScssLint\LintReportWrapper;
 
-use Cheppers\LintReport\FailureWrapperInterface;
+use Sweetchuck\LintReport\FailureWrapperInterface;
 
 class FailureWrapper implements FailureWrapperInterface
 {

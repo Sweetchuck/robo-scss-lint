@@ -1,13 +1,13 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Tests\Unit\Task;
+namespace Sweetchuck\Robo\ScssLint\Tests\Unit\Task;
 
-use Cheppers\AssetJar\AssetJar;
-use Cheppers\Robo\ScssLint\Task\ScssLintRunInput as Task;
+use Sweetchuck\AssetJar\AssetJar;
+use Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput as Task;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
-use Helper\Dummy\Process as DummyProcess;
-use Helper\Dummy\Output as DummyOutput;
+use Sweetchuck\Robo\ScssLint\Test\Helper\Dummy\Process as DummyProcess;
+use Sweetchuck\Robo\ScssLint\Test\Helper\Dummy\Output as DummyOutput;
 use Robo\Robo;
 
 class ScssLintRunInputTest extends Unit
@@ -22,7 +22,7 @@ class ScssLintRunInputTest extends Unit
     }
 
     /**
-     * @var \UnitTester
+     * @var \Sweetchuck\Robo\ScssLint\Test\UnitTester
      */
     protected $tester;
 
@@ -79,7 +79,7 @@ class ScssLintRunInputTest extends Unit
      */
     public function testGetCommand(string $expected, array $options, array $currentFile): void
     {
-        /** @var \Cheppers\Robo\ScssLint\Task\ScssLintRunInput $task */
+        /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput $task */
         $task = Stub::construct(
             Task::class,
             [$options],
@@ -134,7 +134,7 @@ class ScssLintRunInputTest extends Unit
      */
     public function testGetJarValueOrLocal($expected, string $itemName, array $options, array $jarValue): void
     {
-        /** @var \Cheppers\Robo\ScssLint\Task\ScssLintRunInput $task */
+        /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput $task */
         $task = Stub::construct(
             Task::class,
             [$options],
@@ -241,7 +241,7 @@ class ScssLintRunInputTest extends Unit
 
         $properties += ['processClass' => DummyProcess::class];
 
-        /** @var \Cheppers\Robo\ScssLint\Task\ScssLintRunInput $task */
+        /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput $task */
         $task = Stub::construct(
             Task::class,
             [$options],
@@ -265,7 +265,7 @@ class ScssLintRunInputTest extends Unit
 
         $this->tester->assertEquals($expected['exitCode'], $result->getExitCode());
 
-        /** @var \Cheppers\LintReport\ReportWrapperInterface $reportWrapper */
+        /** @var \Sweetchuck\LintReport\ReportWrapperInterface $reportWrapper */
         $reportWrapper = $result['report'];
         if ($reportWrapper) {
             $this->tester->assertEquals(

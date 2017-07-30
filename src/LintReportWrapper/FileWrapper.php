@@ -1,9 +1,9 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\LintReportWrapper;
+namespace Sweetchuck\Robo\ScssLint\LintReportWrapper;
 
-use Cheppers\LintReport\FileWrapperInterface;
-use Cheppers\LintReport\ReportWrapperInterface;
+use Sweetchuck\LintReport\FileWrapperInterface;
+use Sweetchuck\LintReport\ReportWrapperInterface;
 
 class FileWrapper implements FileWrapperInterface
 {
@@ -37,7 +37,7 @@ class FileWrapper implements FileWrapperInterface
     /**
      * {@inheritdoc}
      */
-    public function numOfErrors()
+    public function numOfErrors(): int
     {
         return $this->file['errors'];
     }

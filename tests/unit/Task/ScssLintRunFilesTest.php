@@ -1,14 +1,14 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Tests\Unit\Task;
+namespace Sweetchuck\Robo\ScssLint\Tests\Unit\Task;
 
-use Cheppers\AssetJar\AssetJar;
-use Cheppers\LintReport\Reporter\VerboseReporter;
-use Cheppers\Robo\ScssLint\Task\ScssLintRunFiles as Task;
+use Sweetchuck\AssetJar\AssetJar;
+use Sweetchuck\LintReport\Reporter\VerboseReporter;
+use Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles as Task;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
-use Helper\Dummy\Output as DummyOutput;
-use Helper\Dummy\Process as DummyProcess;
+use Sweetchuck\Robo\ScssLint\Test\Helper\Dummy\Output as DummyOutput;
+use Sweetchuck\Robo\ScssLint\Test\Helper\Dummy\Process as DummyProcess;
 use Robo\Robo;
 
 class ScssLintRunFilesTest extends Unit
@@ -23,7 +23,7 @@ class ScssLintRunFilesTest extends Unit
     }
 
     /**
-     * @var \UnitTester
+     * @var \Sweetchuck\Robo\ScssLint\Test\UnitTester
      */
     protected $tester;
 
@@ -410,7 +410,7 @@ class ScssLintRunFilesTest extends Unit
             'failOnNoFiles' => false,
         ];
 
-        /** @var \Cheppers\Robo\ScssLint\Task\ScssLintRun $task */
+        /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRun $task */
         $task = Stub::construct(
             Task::class,
             [$options, []],
@@ -444,7 +444,7 @@ class ScssLintRunFilesTest extends Unit
         );
 
         if ($withJar) {
-            /** @var \Cheppers\Robo\ScssLint\LintReportWrapper\ReportWrapper $reportWrapper */
+            /** @var \Sweetchuck\Robo\ScssLint\LintReportWrapper\ReportWrapper $reportWrapper */
             $reportWrapper = $assetJar->getValue(['scssLintRun', 'report']);
             $this->tester->assertEquals(
                 json_decode($expectedStdOutput, true),

@@ -1,4 +1,6 @@
 
+namespace: 'Sweetchuck\Robo\ScssLint\Test'
+
 actor: Tester
 
 paths:

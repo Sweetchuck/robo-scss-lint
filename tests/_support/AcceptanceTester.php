@@ -1,5 +1,7 @@
 <?php
 
+namespace Sweetchuck\Robo\ScssLint\Test;
+
 use \PHPUnit_Framework_Assert as Assert;
 
 /**
@@ -98,7 +100,7 @@ class AcceptanceTester extends \Codeception\Actor
         $fileName = codecept_data_dir($fileName);
         $doc = new \DOMDocument();
         $doc->loadXML(file_get_contents($fileName));
-        $xpath = new DOMXPath($doc);
+        $xpath = new \DOMXPath($doc);
         $rootElement = $xpath->query('/checkstyle');
         Assert::assertEquals(1, $rootElement->length, 'Root element of the Checkstyle XML is exists.');
 

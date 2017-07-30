@@ -8,7 +8,7 @@ use Codeception\Test\Unit;
 class FileWrapperTest extends Unit
 {
     /**
-     * @var \UnitTester
+     * @var \Sweetchuck\Robo\ScssLint\Test\UnitTester
      */
     protected $tester;
 

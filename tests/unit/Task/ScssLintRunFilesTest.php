@@ -378,6 +378,7 @@ class ScssLintRunFilesTest extends Unit
                 $c['c'],
                 [
                     'failOn' => $c['f'],
+                    'assetNamePrefix' => ($i % 3 === 0 ? 'my-prefix.' : ''),
                 ],
                 json_encode($report)
             ];

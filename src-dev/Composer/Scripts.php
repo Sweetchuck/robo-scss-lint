@@ -25,34 +25,48 @@ class Scripts
 
     public static function postInstallCmd(Event $event): bool
     {
-        static::init($event);
+        $return = [];
 
-        GitHooks::deploy($event);
-        static::bundleCheckAndInstall($event);
+        if ($event->isDevMode()) {
+            static::init($event);
 
-        return true;
+            $return[] = GitHooks::deploy($event);
+            $return[] = static::bundleCheckAndInstall($event);
+        }
+
+        return count(array_keys($return, false, true)) === 0;
     }
 
     public static function postUpdateCmd(Event $event): bool
     {
-        static::init($event);
+        $return = [];
 
-        GitHooks::deploy($event);
+        if ($event->isDevMode()) {
+            static::init($event);
 
-        return true;
+            $return[] = GitHooks::deploy($event);
+        }
+
+        return count(array_keys($return, false, true)) === 0;
     }
 
     public static function bundleCheckAndInstall(Event $event): bool
     {
-        static::init($event);
+        $return = true;
 
-        $cmdPattern = 'gem install bundler:%s --no-document; bundle check || bundle install';
-        $cmdArgs = [static::$bundlerVersion];
+        if ($event->isDevMode()) {
+            static::init($event);
 
-        $process = new Process(vsprintf($cmdPattern, $cmdArgs));
-        $exitCode = $process->run(static::$processCallbackWrapper);
+            $cmdPattern = 'gem install bundler:%s --no-document; bundle check || bundle install';
+            $cmdArgs = [static::$bundlerVersion];
 
-        return !$exitCode;
+            $process = new Process(vsprintf($cmdPattern, $cmdArgs));
+            $exitCode = $process->run(static::$processCallbackWrapper);
+
+            $return = !$exitCode;
+        }
+
+        return $return;
     }
 
     protected static function init(Event $event)

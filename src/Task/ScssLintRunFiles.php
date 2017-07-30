@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Task;
+namespace Sweetchuck\Robo\ScssLint\Task;
 
 class ScssLintRunFiles extends ScssLintRun
 {

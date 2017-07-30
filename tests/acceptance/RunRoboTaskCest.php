@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Tests\Acceptance;
+namespace Sweetchuck\Robo\ScssLint\Tests\Acceptance;
 
-use AcceptanceTester;
+use Sweetchuck\Robo\ScssLint\Test\AcceptanceTester;
 
 class RunRoboTaskCest
 {
@@ -65,7 +65,7 @@ class RunRoboTaskCest
     public function lintInputWithoutJarTaskCommandOnlyFalse(AcceptanceTester $i): void
     {
         $roboTaskName = 'lint:input-without-jar';
-        // @todo https://github.com/Cheppers/robo-phpcs/issues/6
+        // @todo https://github.com/Sweetchuck/robo-phpcs/issues/6
         if (getenv('TRAVIS_OS_NAME') === 'osx') {
             $i->wantTo("Skip the '$roboTaskName' task, because it does not work on OSX");
 
@@ -84,7 +84,7 @@ class RunRoboTaskCest
     {
         $roboTaskName = 'lint:input-with-jar';
 
-        // @todo https://github.com/Cheppers/robo-phpcs/issues/6
+        // @todo https://github.com/Sweetchuck/robo-phpcs/issues/6
         if (getenv('TRAVIS_OS_NAME') === 'osx') {
             $i->wantTo("Skip the '$roboTaskName' task, because it does not work on OSX");
 

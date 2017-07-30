@@ -1,17 +1,17 @@
 <?php
 
-use Cheppers\AssetJar\AssetJar;
-use Cheppers\LintReport\Reporter\BaseReporter;
-use Cheppers\LintReport\Reporter\CheckstyleReporter;
-use Cheppers\LintReport\Reporter\SummaryReporter;
-use Cheppers\LintReport\Reporter\VerboseReporter;
+use Sweetchuck\AssetJar\AssetJar;
+use Sweetchuck\LintReport\Reporter\BaseReporter;
+use Sweetchuck\LintReport\Reporter\CheckstyleReporter;
+use Sweetchuck\LintReport\Reporter\SummaryReporter;
+use Sweetchuck\LintReport\Reporter\VerboseReporter;
 use League\Container\ContainerInterface;
 
 // @codingStandardsIgnoreStart
 class RoboFile extends \Robo\Tasks
 {
     // @codingStandardsIgnoreEnd
-    use \Cheppers\Robo\ScssLint\ScssLintTaskLoader;
+    use \Sweetchuck\Robo\ScssLint\ScssLintTaskLoader;
 
     /**
      * @var string
@@ -33,7 +33,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\ScssLint\Task\ScssLintRun
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRun
      */
     public function lintFilesDefaultStdOutput()
     {
@@ -43,7 +43,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\ScssLint\Task\ScssLintRun
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRun
      */
     public function lintFilesDefaultFile()
     {
@@ -54,7 +54,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\ScssLint\Task\ScssLintRun
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRun
      */
     public function lintFilesAllInOne()
     {
@@ -79,7 +79,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\ScssLint\Task\ScssLintRunInput
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput
      */
     public function lintInputWithoutJar(
         $options = [
@@ -130,7 +130,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Cheppers\Robo\ScssLint\Task\ScssLintRunInput
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput
      */
     public function lintInputWithJar(
         $options = [

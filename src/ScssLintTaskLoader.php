@@ -1,6 +1,6 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint;
+namespace Sweetchuck\Robo\ScssLint;
 
 use League\Container\ContainerAwareInterface;
 use Robo\Contract\OutputAwareInterface;
@@ -13,12 +13,12 @@ trait ScssLintTaskLoader
      * @param array $options
      *   Key-value pairs of options.
      *
-     * @return \Cheppers\Robo\ScssLint\Task\ScssLintRunFiles
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles
      *   A lint runner task instance.
      */
     protected function taskScssLintRunFiles(array $options = [])
     {
-        /** @var \Cheppers\Robo\ScssLint\Task\ScssLintRunFiles $task */
+        /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles $task */
         $task = $this->task(Task\ScssLintRunFiles::class, $options);
         if ($this instanceof ContainerAwareInterface) {
             $task->setContainer($this->getContainer());
@@ -37,12 +37,12 @@ trait ScssLintTaskLoader
      * @param array $options
      *   Key-value pairs of options.
      *
-     * @return \Cheppers\Robo\ScssLint\Task\ScssLintRunInput
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput
      *   A lint runner task instance.
      */
     protected function taskScssLintRunInput(array $options = [])
     {
-        /** @var \Cheppers\Robo\ScssLint\Task\ScssLintRunInput $task */
+        /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput $task */
         $task = $this->task(Task\ScssLintRunInput::class, $options);
         if ($this instanceof ContainerAwareInterface) {
             $task->setContainer($this->getContainer());

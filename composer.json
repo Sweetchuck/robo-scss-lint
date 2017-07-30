@@ -1,5 +1,5 @@
 {
-    "name": "cheppers/robo-scss-lint",
+    "name": "sweetchuck/robo-scss-lint",
     "description": "Robo task wrapper for scss-lint",
     "license": "GPL-2.0+",
     "config": {
@@ -10,35 +10,34 @@
     "prefer-stable": true,
     "require": {
         "php": ">=7.1",
-        "cheppers/asset-jar": "^0.0",
-        "cheppers/lint-report": "^0.0",
+        "sweetchuck/asset-jar": "^0.0",
+        "sweetchuck/lint-report": "^0.0",
         "consolidation/robo": "^1.0"
     },
     "require-dev": {
-        "cheppers/git-hooks": "^0.0",
-        "cheppers/robo-git": "^0.0",
-        "cheppers/robo-phpcs": "^0.0",
+        "sweetchuck/git-hooks": "^0.0",
+        "sweetchuck/robo-git": "^0.0",
+        "sweetchuck/robo-phpcs": "^0.0",
         "codeception/codeception": "^2.2",
         "symfony/yaml": "^2.8||^3.1"
     },
     "autoload": {
         "psr-4": {
-            "Cheppers\\Robo\\ScssLint\\": "src/"
+            "Sweetchuck\\Robo\\ScssLint\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Cheppers\\Robo\\ScssLint\\Tests\\Acceptance\\": "tests/acceptance/",
-            "Cheppers\\Robo\\ScssLint\\Tests\\Unit\\": "tests/unit/"
+            "Sweetchuck\\Robo\\ScssLint\\Composer\\": "src-dev/Composer/",
+            "Sweetchuck\\Robo\\ScssLint\\Test\\": "tests/_support/",
+            "Sweetchuck\\Robo\\ScssLint\\Tests\\Unit\\": "tests/unit/",
+            "Sweetchuck\\Robo\\ScssLint\\Tests\\Acceptance\\": "tests/acceptance/"
         }
     },
     "scripts": {
-        "post-install-cmd": [
-            "@deploy-git-hooks"
-        ],
-        "post-update-cmd": [
-            "@deploy-git-hooks"
-        ],
-        "deploy-git-hooks": "\\Cheppers\\GitHooks\\Main::deploy"
+        "post-install-cmd": "\\Sweetchuck\\Robo\\ScssLint\\Composer\\Scripts::postInstallCmd",
+        "post-update-cmd": "\\Sweetchuck\\Robo\\ScssLint\\Composer\\Scripts::postUpdateCmd",
+        "deploy-git-hooks": "\\Sweetchuck\\GitHooks\\Composer\\Scripts::deploy",
+        "bundle-check-install": "\\Sweetchuck\\Robo\\ScssLint\\Composer\\Scripts::bundleCheckAndInstall"
     }
 }

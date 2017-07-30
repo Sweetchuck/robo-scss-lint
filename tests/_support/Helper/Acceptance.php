@@ -1,6 +1,6 @@
 <?php
 
-namespace Helper;
+namespace Sweetchuck\Robo\ScssLint\Test\Helper;
 
 use Codeception\Module;
 

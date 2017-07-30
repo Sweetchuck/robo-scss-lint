@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Tests\Unit\LintReportWrapper;
+namespace Sweetchuck\Robo\ScssLint\Tests\Unit\LintReportWrapper;
 
-use Cheppers\Robo\ScssLint\LintReportWrapper\ReportWrapper;
+use Sweetchuck\Robo\ScssLint\LintReportWrapper\ReportWrapper;
 use Codeception\Test\Unit;
 
 class ReportWrapperTest extends Unit
@@ -171,7 +171,7 @@ class ReportWrapperTest extends Unit
 
         /**
          * @var string $filePath
-         * @var \Cheppers\Robo\ScssLint\LintReportWrapper\FileWrapper $fw
+         * @var \Sweetchuck\Robo\ScssLint\LintReportWrapper\FileWrapper $fw
          */
         foreach ($rw->yieldFiles() as $filePath => $fw) {
             $fileStats = $filesStats[$filePath];
@@ -183,7 +183,7 @@ class ReportWrapperTest extends Unit
 
             /**
              * @var int $i
-             * @var \Cheppers\LintReport\FailureWrapperInterface $failureWrapper
+             * @var \Sweetchuck\LintReport\FailureWrapperInterface $failureWrapper
              */
             foreach ($fw->yieldFailures() as $i => $failureWrapper) {
                 $failure = $report[$filePath][$i];

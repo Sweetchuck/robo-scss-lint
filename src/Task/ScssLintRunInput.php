@@ -1,8 +1,8 @@
 <?php
 
-namespace Cheppers\Robo\ScssLint\Task;
+namespace Sweetchuck\Robo\ScssLint\Task;
 
-use Cheppers\Robo\ScssLint\LintReportWrapper\ReportWrapper;
+use Sweetchuck\Robo\ScssLint\LintReportWrapper\ReportWrapper;
 
 class ScssLintRunInput extends ScssLintRun
 {

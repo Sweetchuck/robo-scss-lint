@@ -1,6 +1,5 @@
 <?php
 
-use Sweetchuck\AssetJar\AssetJar;
 use Sweetchuck\LintReport\Reporter\BaseReporter;
 use Sweetchuck\LintReport\Reporter\CheckstyleReporter;
 use Sweetchuck\LintReport\Reporter\SummaryReporter;
@@ -81,7 +80,7 @@ class RoboFile extends \Robo\Tasks
     /**
      * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput
      */
-    public function lintInputWithoutJar(
+    public function lintInput(
         $options = [
             'command-only' => false,
         ]
@@ -127,26 +126,5 @@ class RoboFile extends \Robo\Tasks
             ->addLintReporter('summary:StdOutput', 'lintSummaryReporter')
             ->addLintReporter('summary:file', $summaryFile)
             ->addLintReporter('checkstyle:file', $checkstyleFile);
-    }
-
-    /**
-     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput
-     */
-    public function lintInputWithJar(
-        $options = [
-            'command-only' => false,
-        ]
-    ) {
-        $task = $this->lintInputWithoutJar($options);
-        $assetJar = new AssetJar([
-            'l1' => [
-                'l2' => $task->getPaths(),
-            ],
-        ]);
-
-        return $task
-            ->setPaths([])
-            ->setAssetJar($assetJar)
-            ->setAssetJarMap('paths', ['l1', 'l2']);
     }
 }

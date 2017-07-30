@@ -2,7 +2,6 @@
 
 namespace Sweetchuck\Robo\ScssLint\Tests\Unit\Task;
 
-use Sweetchuck\AssetJar\AssetJar;
 use Sweetchuck\LintReport\Reporter\VerboseReporter;
 use Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles as Task;
 use Codeception\Test\Unit;
@@ -340,7 +339,7 @@ class ScssLintRunFilesTest extends Unit
             'linter' => 'S2',
         ];
 
-        $label_pattern = '%d; failOn: %s; E: %d; W: %d; exitCode: %d; withJar: %s;';
+        $label_pattern = '%d; failOn: %s; E: %d; W: %d; exitCode: %d;';
         $cases = [];
 
         $combinations = [
@@ -361,30 +360,26 @@ class ScssLintRunFilesTest extends Unit
         ];
 
         $i = 0;
-        foreach ([true, false] as $withJar) {
-            $withJarStr = $withJar ? 'true' : 'false';
-            foreach ($combinations as $c) {
-                $i++;
-                $report = $reportBase;
+        foreach ($combinations as $c) {
+            $i++;
+            $report = $reportBase;
 
-                if ($c['e']) {
-                    $report['a.scss'][] = $messageError;
-                }
-
-                if ($c['w']) {
-                    $report['a.scss'][] = $messageWarning;
-                }
-
-                $label = sprintf($label_pattern, $i, $c['f'], $c['e'], $c['w'], $c['c'], $withJarStr);
-                $cases[$label] = [
-                    $c['c'],
-                    [
-                        'failOn' => $c['f'],
-                    ],
-                    $withJar,
-                    json_encode($report)
-                ];
+            if ($c['e']) {
+                $report['a.scss'][] = $messageError;
             }
+
+            if ($c['w']) {
+                $report['a.scss'][] = $messageWarning;
+            }
+
+            $label = sprintf($label_pattern, $i, $c['f'], $c['e'], $c['w'], $c['c']);
+            $cases[$label] = [
+                $c['c'],
+                [
+                    'failOn' => $c['f'],
+                ],
+                json_encode($report)
+            ];
         }
 
         return $cases;
@@ -395,7 +390,7 @@ class ScssLintRunFilesTest extends Unit
      *
      * @dataProvider casesRun
      */
-    public function testRun(int $exitCode, array $options, bool $withJar, string $expectedStdOutput): void
+    public function testRun(int $exitCode, array $options, string $expectedStdOutput): void
     {
         $container = Robo::createDefaultContainer();
         Robo::setContainer($container);
@@ -404,7 +399,6 @@ class ScssLintRunFilesTest extends Unit
 
         $options += [
             'workingDirectory' => 'my-working-dir',
-            'assetJarMapping' => ['report' => ['scssLintRun', 'report']],
             'format' => 'JSON',
             'failOn' => 'warning',
             'failOnNoFiles' => false,
@@ -429,12 +423,6 @@ class ScssLintRunFilesTest extends Unit
         $task->setLogger($container->get('logger'));
         $task->setOutput($mainStdOutput);
 
-        $assetJar = null;
-        if ($withJar) {
-            $assetJar = new AssetJar();
-            $task->setAssetJar($assetJar);
-        }
-
         $result = $task->run();
 
         $this->tester->assertEquals(
@@ -443,21 +431,21 @@ class ScssLintRunFilesTest extends Unit
             'Exit code'
         );
 
-        if ($withJar) {
-            /** @var \Sweetchuck\Robo\ScssLint\LintReportWrapper\ReportWrapper $reportWrapper */
-            $reportWrapper = $assetJar->getValue(['scssLintRun', 'report']);
-            $this->tester->assertEquals(
-                json_decode($expectedStdOutput, true),
-                $reportWrapper->getReport(),
-                'Output equals with jar'
-            );
-        } else {
-            $this->tester->assertContains(
-                $expectedStdOutput,
-                $mainStdOutput->output,
-                'Output contains'
-            );
-        }
+        $assetNamePrefix = $options['assetNamePrefix'] ?? '';
+
+        /** @var \Sweetchuck\LintReport\ReportWrapperInterface $reportWrapper */
+        $reportWrapper = $result["{$assetNamePrefix}report"];
+        $this->tester->assertEquals(
+            json_decode($expectedStdOutput, true),
+            $reportWrapper->getReport(),
+            'Output equals with jar'
+        );
+
+        $this->tester->assertContains(
+            $expectedStdOutput,
+            $mainStdOutput->output,
+            'Output contains'
+        );
     }
 
     public function testRunNativeAndExtraReporterConflict(): void
@@ -482,8 +470,6 @@ class ScssLintRunFilesTest extends Unit
         );
 
         $task->setLogger($container->get('logger'));
-        $assetJar = new AssetJar();
-        $task->setAssetJar($assetJar);
 
         $result = $task->run();
 

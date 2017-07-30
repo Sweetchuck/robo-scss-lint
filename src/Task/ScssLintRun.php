@@ -2,8 +2,6 @@
 
 namespace Sweetchuck\Robo\ScssLint\Task;
 
-use Sweetchuck\AssetJar\AssetJarAware;
-use Sweetchuck\AssetJar\AssetJarAwareInterface;
 use Sweetchuck\LintReport\ReporterInterface;
 use Sweetchuck\Robo\ScssLint\LintReportWrapper\ReportWrapper;
 use Sweetchuck\Robo\ScssLint\Utils;
@@ -19,13 +17,11 @@ use Robo\Task\BaseTask;
 use Symfony\Component\Process\Process;
 
 class ScssLintRun extends BaseTask implements
-    AssetJarAwareInterface,
     CommandInterface,
     ContainerAwareInterface,
     BuilderAwareInterface,
     OutputAwareInterface
 {
-    use AssetJarAware;
     use ContainerAwareTrait;
     use BuilderAwareTrait;
     use IO;
@@ -61,8 +57,31 @@ class ScssLintRun extends BaseTask implements
      */
     protected $processClass = Process::class;
 
-    //region Options.
-    //region Option - workingDirectory.
+    // region Options.
+
+    // region Option - assetNamePrefix.
+    /**
+     * @var string
+     */
+    protected $assetNamePrefix = '';
+
+    public function getAssetNamePrefix(): string
+    {
+        return $this->assetNamePrefix;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setAssetNamePrefix(string $value)
+    {
+        $this->assetNamePrefix = $value;
+
+        return $this;
+    }
+    // endregion
+
+    // region Option - workingDirectory.
     /**
      * Directory to step in before run the `scss-lint`.
      *
@@ -86,9 +105,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - bundleGemFile.
+    // region Option - bundleGemFile.
     /**
      * @var string
      */
@@ -108,9 +127,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - bundleExecutable.
+    // region Option - bundleExecutable.
     /**
      * @var string
      */
@@ -130,9 +149,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - scssLintExecutable.
+    // region Option - scssLintExecutable.
     /**
      * @var string
      */
@@ -152,9 +171,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - failOn.
+    // region Option - failOn.
     /**
      * Severity level.
      *
@@ -181,9 +200,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - failOnNoFiles.
+    // region Option - failOnNoFiles.
     /**
      * Fail if there is no SCSS file to lint.
      *
@@ -207,9 +226,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - lintReporters.
+    // region Option - lintReporters.
     /**
      * @var \Sweetchuck\LintReport\ReporterInterface[]
      */
@@ -257,9 +276,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - format.
+    // region Option - format.
     /**
      * Specify how to display lints.
      *
@@ -293,9 +312,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - requires.
+    // region Option - requires.
     /**
      * Required Ruby files.
      *
@@ -328,9 +347,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - linters.
+    // region Option - linters.
     /**
      * Linters to include or exclude.
      *
@@ -363,9 +382,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - configFile.
+    // region Option - configFile.
     /**
      * Config file path.
      *
@@ -389,9 +408,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - exclude.
+    // region Option - exclude.
     /**
      * SCSS files to exclude.
      *
@@ -424,9 +443,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - out.
+    // region Option - out.
     /**
      * Write output to a file instead of STDOUT.
      *
@@ -452,9 +471,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - colorize.
+    // region Option - colorize.
     /**
      * Force output to be colorized.
      *
@@ -478,9 +497,9 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
+    // endregion
 
-    //region Option - paths.
+    // region Option - paths.
     /**
      * SCSS files to check.
      *
@@ -507,8 +526,15 @@ class ScssLintRun extends BaseTask implements
 
         return $this;
     }
-    //endregion
-    //endregion
+    // endregion
+    // endregion
+
+    /**
+     * @var array
+     */
+    protected $assets = [
+        'report' => null,
+    ];
 
     protected $options = [
         'format' => 'value',
@@ -591,10 +617,9 @@ class ScssLintRun extends BaseTask implements
     public function setOptions(array $options)
     {
         foreach ($options as $name => $value) {
-            // @codingStandardsIgnoreStart
             switch ($name) {
-                case 'assetJarMapping':
-                    $this->setAssetJarMapping($value);
+                case 'assetNamePrefix':
+                    $this->setAssetNamePrefix($value);
                     break;
 
                 case 'workingDirectory':
@@ -657,7 +682,6 @@ class ScssLintRun extends BaseTask implements
                     $this->setPaths($value);
                     break;
             }
-            // @codingStandardsIgnoreEnd
         }
 
         return $this;
@@ -707,7 +731,6 @@ class ScssLintRun extends BaseTask implements
             ->runHeader()
             ->runLint()
             ->runReleaseLintReports()
-            ->runReleaseAssets()
             ->runReturn();
     }
 
@@ -775,24 +798,6 @@ class ScssLintRun extends BaseTask implements
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    protected function runReleaseAssets()
-    {
-        if ($this->isLintSuccess() && $this->hasAssetJar()) {
-            if ($this->getAssetJarMap('workingDirectory')) {
-                $this->setAssetJarValue('workingDirectory', $this->getWorkingDirectory());
-            }
-
-            if ($this->getAssetJarMap('report')) {
-                $this->setAssetJarValue('report', $this->reportWrapper);
-            }
-        }
-
-        return $this;
-    }
-
     protected function runReturn(): Result
     {
         $exitCode = $this->reportWrapper ?
@@ -802,14 +807,13 @@ class ScssLintRun extends BaseTask implements
             )
             : $this->lintExitCode;
 
+        $this->assets['report'] = $this->reportWrapper;
+
         return new Result(
             $this,
             $exitCode,
             $this->getExitMessage($exitCode),
-            [
-                'workingDirectory' => $this->getWorkingDirectory(),
-                'report' => $this->reportWrapper,
-            ]
+            $this->getAssetsWithPrefixedNames()
         );
     }
 
@@ -906,6 +910,21 @@ class ScssLintRun extends BaseTask implements
             'out' =>  $this->getOut(),
             'color' => $this->getColor(),
         ];
+    }
+
+    protected function getAssetsWithPrefixedNames(): array
+    {
+        $prefix = $this->getAssetNamePrefix();
+        if (!$prefix) {
+            return $this->assets;
+        }
+
+        $data = [];
+        foreach ($this->assets as $key => $value) {
+            $data["{$prefix}{$key}"] = $value;
+        }
+
+        return $data;
     }
 
     /**

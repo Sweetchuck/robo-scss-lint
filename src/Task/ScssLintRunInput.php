@@ -76,7 +76,7 @@ class ScssLintRunInput extends ScssLintRun
     protected function runLint()
     {
         $reports = [];
-        $files = $this->getJarValueOrLocal('paths');
+        $files = $this->getPaths();
         $backupFailOn = $this->getFailOn();
 
         $this->setFailOn('never');
@@ -136,27 +136,6 @@ class ScssLintRunInput extends ScssLintRun
     }
 
     /**
-     * @return mixed|null
-     */
-    protected function getJarValueOrLocal(string $itemName)
-    {
-        $map = $this->getAssetJarMap($itemName);
-        if ($map) {
-            $value = $this->getAssetJarValue($itemName, $keyExists);
-            if ($keyExists) {
-                return $value;
-            }
-        }
-
-        switch ($itemName) {
-            case 'paths':
-                return $this->getPaths();
-        }
-
-        return null;
-    }
-
-    /**
      * @return string
      */
     protected function getTaskInfoPattern()
@@ -170,7 +149,7 @@ class ScssLintRunInput extends ScssLintRun
     protected function getTaskContext($context = null)
     {
         return [
-            'count' => count($this->getJarValueOrLocal('paths')),
+            'count' => count($this->getPaths()),
         ] + parent::getTaskContext($context);
     }
 }

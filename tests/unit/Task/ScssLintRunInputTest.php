@@ -2,7 +2,6 @@
 
 namespace Sweetchuck\Robo\ScssLint\Tests\Unit\Task;
 
-use Sweetchuck\AssetJar\AssetJar;
 use Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput as Task;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
@@ -105,7 +104,6 @@ class ScssLintRunInputTest extends Unit
                 'paths',
                 [
                     'paths' => ['a.scss', 'b.scss'],
-                    'assetJarMapping' => ['paths' => ['l1', 'l2']],
                 ],
                 [
                     'l1' => [
@@ -118,7 +116,6 @@ class ScssLintRunInputTest extends Unit
                 'non-exists',
                 [
                     'paths' => ['a.scss', 'b.scss'],
-                    'assetJarMapping' => ['paths' => ['l1', 'l2']],
                 ],
                 [
                     'l1' => [
@@ -127,23 +124,6 @@ class ScssLintRunInputTest extends Unit
                 ],
             ],
         ];
-    }
-
-    /**
-     * @dataProvider casesGetJarValueOrLocal
-     */
-    public function testGetJarValueOrLocal($expected, string $itemName, array $options, array $jarValue): void
-    {
-        /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput $task */
-        $task = Stub::construct(
-            Task::class,
-            [$options],
-            []
-        );
-        $method = static::getMethod('getJarValueOrLocal');
-        $task->setAssetJar(new AssetJar($jarValue));
-
-        $this->tester->assertEquals($expected, $method->invoke($task, $itemName));
     }
 
     public function casesRun(): array

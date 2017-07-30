@@ -62,9 +62,9 @@ class RunRoboTaskCest
         $I->seeThisTextInTheStdError('One or more errors were reported (and any number of warnings)');
     }
 
-    public function lintInputWithoutJarTaskCommandOnlyFalse(AcceptanceTester $i): void
+    public function lintInputTaskCommandOnlyFalse(AcceptanceTester $i): void
     {
-        $roboTaskName = 'lint:input-without-jar';
+        $roboTaskName = 'lint:input';
         // @todo https://github.com/Sweetchuck/robo-phpcs/issues/6
         if (getenv('TRAVIS_OS_NAME') === 'osx') {
             $i->wantTo("Skip the '$roboTaskName' task, because it does not work on OSX");
@@ -75,28 +75,9 @@ class RunRoboTaskCest
         $this->lintInput($i, $roboTaskName);
     }
 
-    public function lintInputWithoutJarTaskCommandOnlyTrue(AcceptanceTester $i): void
+    public function lintInputTaskCommandOnlyTrue(AcceptanceTester $i): void
     {
-        $this->lintInput($i, 'lint:input-without-jar', [], ['command-only' => null]);
-    }
-
-    public function lintInputWithJarTaskCommandOnlyFalse(AcceptanceTester $i)
-    {
-        $roboTaskName = 'lint:input-with-jar';
-
-        // @todo https://github.com/Sweetchuck/robo-phpcs/issues/6
-        if (getenv('TRAVIS_OS_NAME') === 'osx') {
-            $i->wantTo("Skip the '$roboTaskName' task, because it does not work on OSX");
-
-            return;
-        }
-
-        $this->lintInput($i, $roboTaskName);
-    }
-
-    public function lintInputWithJarTaskCommandOnlyTrue(AcceptanceTester $i)
-    {
-        $this->lintInput($i, 'lint:input-with-jar', [], ['command-only' => null]);
+        $this->lintInput($i, 'lint:input', [], ['command-only' => null]);
     }
 
     protected function lintInput(AcceptanceTester $I, $roboTaskName, array $args = [], array $options = []): void

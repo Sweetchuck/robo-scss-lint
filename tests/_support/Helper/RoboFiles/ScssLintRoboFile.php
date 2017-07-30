@@ -1,16 +1,18 @@
 <?php
 
+namespace Sweetchuck\Robo\ScssLint\Test\Helper\RoboFiles;
+
+use Robo\Tasks;
 use Sweetchuck\LintReport\Reporter\BaseReporter;
 use Sweetchuck\LintReport\Reporter\CheckstyleReporter;
 use Sweetchuck\LintReport\Reporter\SummaryReporter;
 use Sweetchuck\LintReport\Reporter\VerboseReporter;
 use League\Container\ContainerInterface;
+use Sweetchuck\Robo\ScssLint\ScssLintTaskLoader;
 
-// @codingStandardsIgnoreStart
-class RoboFile extends \Robo\Tasks
+class ScssLintRoboFile extends Tasks
 {
-    // @codingStandardsIgnoreEnd
-    use \Sweetchuck\Robo\ScssLint\ScssLintTaskLoader;
+    use ScssLintTaskLoader;
 
     /**
      * @var string
@@ -18,8 +20,6 @@ class RoboFile extends \Robo\Tasks
     protected $reportsDir = 'actual';
 
     /**
-     * @param \League\Container\ContainerInterface $container
-     *
      * @return $this
      */
     public function setContainer(ContainerInterface $container)
@@ -32,7 +32,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRun
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRun|\Robo\Collection\CollectionBuilder
      */
     public function lintFilesDefaultStdOutput()
     {
@@ -42,7 +42,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRun
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRun|\Robo\Collection\CollectionBuilder
      */
     public function lintFilesDefaultFile()
     {
@@ -53,7 +53,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRun
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRun|\Robo\Collection\CollectionBuilder
      */
     public function lintFilesAllInOne()
     {
@@ -78,7 +78,7 @@ class RoboFile extends \Robo\Tasks
     }
 
     /**
-     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput
+     * @return \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput|\Robo\Collection\CollectionBuilder
      */
     public function lintInput(
         $options = [

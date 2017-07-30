@@ -3,6 +3,7 @@
 namespace Sweetchuck\Robo\ScssLint\Tests\Acceptance;
 
 use Sweetchuck\Robo\ScssLint\Test\AcceptanceTester;
+use Sweetchuck\Robo\ScssLint\Test\Helper\RoboFiles\ScssLintRoboFile;
 
 class RunRoboTaskCest
 {
@@ -23,43 +24,92 @@ class RunRoboTaskCest
         $I->clearTheReportsDir();
     }
 
-    public function lintFilesAllInOne(AcceptanceTester $I): void
+    public function lintFilesAllInOne(AcceptanceTester $i): void
     {
-        $roboTaskName = 'lint:files-all-in-one';
-        $command = $this->getCommand($roboTaskName);
+        $id = __METHOD__;
 
-        $I->wantTo("Run Robo task '<comment>$command</comment>'.");
-        $I->runRoboTask($roboTaskName);
-        $I->expectTheExitCodeToBe(2);
-        $I->seeThisTextInTheStdOutput(file_get_contents("{$this->expectedDir}/extra.verbose.txt"));
-        $I->seeThisTextInTheStdOutput(file_get_contents("{$this->expectedDir}/extra.summary.txt"));
-        $I->haveAFileLikeThis('extra.verbose.txt');
-        $I->haveAFileLikeThis('extra.summary.txt');
-        $I->seeThisTextInTheStdError('One or more errors were reported (and any number of warnings)');
+        $cwd = getcwd();
+        chdir(codecept_data_dir());
+        $i->runRoboTask(
+            $id,
+            ScssLintRoboFile::class,
+            'lint:files-all-in-one'
+        );
+        chdir($cwd);
+
+        $exitCode = $i->getRoboTaskExitCode($id);
+        $stdOutput = $i->getRoboTaskStdOutput($id);
+        $stdError = $i->getRoboTaskStdError($id);
+
+        $i->assertEquals(2, $exitCode);
+        $i->assertContains(
+            file_get_contents("{$this->expectedDir}/extra.verbose.txt"),
+            $stdOutput
+        );
+        $i->assertContains(
+            file_get_contents("{$this->expectedDir}/extra.summary.txt"),
+            $stdOutput
+        );
+        $i->assertContains(
+            'One or more errors were reported (and any number of warnings)',
+            $stdError
+        );
+
+        $i->haveAFileLikeThis('extra.verbose.txt');
+        $i->haveAFileLikeThis('extra.summary.txt');
     }
 
-    public function lintFilesDefaultFile(AcceptanceTester $I): void
+    public function lintFilesDefaultFile(AcceptanceTester $i): void
     {
-        $roboTaskName = 'lint:files-default-file';
-        $command = $this->getCommand($roboTaskName);
+        $id = __METHOD__;
 
-        $I->wantTo("Run Robo task '<comment>$command</comment>'.");
-        $I->runRoboTask($roboTaskName);
-        $I->expectTheExitCodeToBe(2);
-        $I->haveAFileLikeThis('native.default.txt');
-        $I->seeThisTextInTheStdError('One or more errors were reported (and any number of warnings)');
+        $cwd = getcwd();
+        chdir(codecept_data_dir());
+        $i->runRoboTask(
+            $id,
+            ScssLintRoboFile::class,
+            'lint:files-default-file'
+        );
+        chdir($cwd);
+
+        $exitCode = $i->getRoboTaskExitCode($id);
+        $stdError = $i->getRoboTaskStdError($id);
+
+        $i->assertEquals(2, $exitCode);
+        $i->assertContains(
+            'One or more errors were reported (and any number of warnings)',
+            $stdError
+        );
+        $i->haveAFileLikeThis('native.default.txt');
     }
 
-    public function lintFilesDefaultStdOutput(AcceptanceTester $I): void
+    public function lintFilesDefaultStdOutput(AcceptanceTester $i): void
     {
-        $roboTaskName = 'lint:files-default-std-output';
-        $command = $this->getCommand($roboTaskName);
+        $id = __METHOD__;
 
-        $I->wantTo("Run Robo task '<comment>$command</comment>'.");
-        $I->runRoboTask($roboTaskName);
-        $I->expectTheExitCodeToBe(2);
-        $I->seeThisTextInTheStdOutput(file_get_contents("{$this->expectedDir}/native.default.txt"));
-        $I->seeThisTextInTheStdError('One or more errors were reported (and any number of warnings)');
+        $cwd = getcwd();
+        chdir(codecept_data_dir());
+        $i->runRoboTask(
+            $id,
+            ScssLintRoboFile::class,
+            'lint:files-default-std-output'
+        );
+        chdir($cwd);
+
+        $exitCode = $i->getRoboTaskExitCode($id);
+        $stdOutput = $i->getRoboTaskStdOutput($id);
+        $stdError = $i->getRoboTaskStdError($id);
+
+        $i->assertEquals(2, $exitCode);
+
+        $i->assertContains(
+            file_get_contents("{$this->expectedDir}/native.default.txt"),
+            $stdOutput
+        );
+        $i->assertContains(
+            'One or more errors were reported (and any number of warnings)',
+            $stdError
+        );
     }
 
     public function lintInputTaskCommandOnlyFalse(AcceptanceTester $i): void
@@ -77,42 +127,33 @@ class RunRoboTaskCest
 
     public function lintInputTaskCommandOnlyTrue(AcceptanceTester $i): void
     {
-        $this->lintInput($i, 'lint:input', [], ['command-only' => null]);
+        $this->lintInput($i, 'lint:input', ['--command-only']);
     }
 
-    protected function lintInput(AcceptanceTester $I, $roboTaskName, array $args = [], array $options = []): void
+    protected function lintInput(AcceptanceTester $i, string $roboTaskName, array $argsAndOptions = []): void
     {
-        $command = $this->getCommand($roboTaskName, $args, $options);
+        $id = "$roboTaskName " . implode(' ', $argsAndOptions);
 
-        $I->wantTo("Run Robo task '<comment>$command</comment>'.");
-        $I->runRoboTask($roboTaskName, $args, $options);
-        $I->expectTheExitCodeToBe(2);
-        $I->haveAFileLikeThis('input.checkstyle.xml');
-        $I->haveAFileLikeThis('input.summary.txt');
-        $I->haveAFileLikeThis('input.verbose.txt');
-        $I->seeThisTextInTheStdError('One or more errors were reported (and any number of warnings)');
-    }
+        $i->wantTo("Run Robo task '<comment>$id</comment>'.");
 
-    protected function getCommand(string $roboTaskName, array $args = [], array $options = []): string
-    {
-        $cmdPattern = '%s';
-        $cmdArgs = [
-            escapeshellarg($roboTaskName),
-        ];
+        $cwd = getcwd();
+        chdir(codecept_data_dir());
+        $i->runRoboTask(
+            $id,
+            ScssLintRoboFile::class,
+            $roboTaskName,
+            ...$argsAndOptions
+        );
+        chdir($cwd);
 
-        foreach ($options as $option => $value) {
-            $cmdPattern .= " --$option";
-            if ($value !== null) {
-                $cmdPattern .= '=%s';
-                $cmdArgs[] = escapeshellarg($value);
-            }
-        }
+        $exitCode = $i->getRoboTaskExitCode($id);
+        $stdError = $i->getRoboTaskStdError($id);
 
-        $cmdPattern .= str_repeat(' %s', count($args));
-        foreach ($args as $arg) {
-            $cmdArgs[] = escapeshellarg($arg);
-        }
+        $i->assertEquals(2, $exitCode);
+        $i->assertContains('One or more errors were reported (and any number of warnings)', $stdError);
 
-        return vsprintf($cmdPattern, $cmdArgs);
+        $i->haveAFileLikeThis('input.checkstyle.xml');
+        $i->haveAFileLikeThis('input.summary.txt');
+        $i->haveAFileLikeThis('input.verbose.txt');
     }
 }

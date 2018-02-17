@@ -7,7 +7,7 @@ use Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles as Task;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use Sweetchuck\Codeception\Module\RoboTaskRunner\DummyOutput;
-use Sweetchuck\Robo\ScssLint\Test\Helper\Dummy\Process as DummyProcess;
+use Sweetchuck\Codeception\Module\RoboTaskRunner\DummyProcess;
 use Robo\Robo;
 use Symfony\Component\Console\Output\OutputInterface;
 

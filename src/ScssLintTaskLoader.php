@@ -19,7 +19,8 @@ trait ScssLintTaskLoader
     protected function taskScssLintRunFiles(array $options = [])
     {
         /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles $task */
-        $task = $this->task(Task\ScssLintRunFiles::class, $options);
+        $task = $this->task(Task\ScssLintRunFiles::class);
+        $task->setOptions($options);
         if ($this instanceof ContainerAwareInterface) {
             $task->setContainer($this->getContainer());
         }
@@ -43,7 +44,8 @@ trait ScssLintTaskLoader
     protected function taskScssLintRunInput(array $options = [])
     {
         /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput $task */
-        $task = $this->task(Task\ScssLintRunInput::class, $options);
+        $task = $this->task(Task\ScssLintRunInput::class);
+        $task->setOptions($options);
         if ($this instanceof ContainerAwareInterface) {
             $task->setContainer($this->getContainer());
         }

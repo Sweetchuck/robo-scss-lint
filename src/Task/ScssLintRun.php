@@ -536,16 +536,6 @@ class ScssLintRun extends BaseTask implements
         'report' => null,
     ];
 
-    protected $options = [
-        'format' => 'value',
-        'require' => 'multi-value',
-        'linter' => 'include-exclude',
-        'exclude' => 'list',
-        'config' => 'value',
-        'out' =>  'value',
-        'color' => 'tri-state',
-    ];
-
     /**
      * Process exit code.
      *
@@ -843,42 +833,43 @@ class ScssLintRun extends BaseTask implements
 
         $cmdPattern .= escapeshellcmd($this->getScssLintExecutable());
 
-        foreach ($options as $optionName => $optionValue) {
-            switch ($this->options[$optionName]) {
+        foreach ($options as $optionName => $option) {
+            $optionNameCli = $option['cliName'] ?? $optionName;
+            switch ($option['type']) {
                 case 'value':
-                    if ($optionValue) {
-                        $cmdPattern .= " --$optionName=%s";
-                        $cmdArgs[] = escapeshellarg($optionValue);
+                    if ($option['value']) {
+                        $cmdPattern .= " --$optionNameCli=%s";
+                        $cmdArgs[] = escapeshellarg($option['value']);
                     }
                     break;
 
                 case 'multi-value':
-                    $values = array_keys($optionValue, true, true);
-                    $cmdPattern .= str_repeat(" --$optionName=%s", count($values));
+                    $values = array_keys($option['value'], true, true);
+                    $cmdPattern .= str_repeat(" --$optionNameCli=%s", count($values));
                     foreach ($values as $value) {
                         $cmdArgs[] = escapeshellarg($value);
                     }
                     break;
 
                 case 'list':
-                    $values = array_keys($optionValue, true, true);
+                    $values = array_keys($option['value'], true, true);
                     if ($values) {
-                        $cmdPattern .= " --$optionName=%s";
+                        $cmdPattern .= " --$optionNameCli=%s";
                         $cmdArgs[] = escapeshellarg(implode(',', $values));
                     }
                     break;
 
                 case 'tri-state':
-                    if ($optionValue !== null) {
-                        $cmdPattern .= $optionValue ? " --$optionName" : " --no-$optionName";
+                    if ($option['value'] !== null) {
+                        $cmdPattern .= $option['value'] ? " --$optionNameCli" : " --no-$optionNameCli";
                     }
                     break;
 
                 case 'include-exclude':
                     foreach (['include' => true, 'exclude' => false] as $optionNamePrefix => $filter) {
-                        $values = array_keys($optionValue, $filter, true);
+                        $values = array_keys($option['value'], $filter, true);
                         if ($values) {
-                            $cmdPattern .= " --$optionNamePrefix-$optionName=%s";
+                            $cmdPattern .= " --$optionNamePrefix-$optionNameCli=%s";
                             $cmdArgs[] = escapeshellarg(implode(',', $values));
                         }
                     }
@@ -902,13 +893,34 @@ class ScssLintRun extends BaseTask implements
     protected function getCommandOptions(): array
     {
         return [
-            'format' => $this->getFormat(),
-            'require' => $this->getRequire(),
-            'linter' => $this->getLinters(),
-            'config' => $this->getConfigFile(),
-            'exclude' => $this->getExclude(),
-            'out' =>  $this->getOut(),
-            'color' => $this->getColor(),
+            'format' => [
+                'type' => 'value',
+                'value' => $this->getFormat(),
+            ],
+            'require' => [
+                'type' => 'multi-value',
+                'value' => $this->getRequire(),
+            ],
+            'linter' => [
+                'type' => 'include-exclude',
+                'value' => $this->getLinters(),
+            ],
+            'config' => [
+                'type' => 'value',
+                'value' => $this->getConfigFile(),
+            ],
+            'exclude' => [
+                'type' => 'list',
+                'value' => $this->getExclude(),
+            ],
+            'out' => [
+                'type' =>  'value',
+                'value' =>  $this->getOut(),
+            ],
+            'color' => [
+                'type' => 'tri-state',
+                'value' => $this->getColor(),
+            ],
         ];
     }
 

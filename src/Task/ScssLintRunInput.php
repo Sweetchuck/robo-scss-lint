@@ -46,13 +46,6 @@ class ScssLintRunInput extends ScssLintRun
     }
     //endregion
 
-    public function __construct(array $options = [])
-    {
-        $this->options['stdin-file-path'] = 'value';
-
-        parent::__construct($options);
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -131,7 +124,11 @@ class ScssLintRunInput extends ScssLintRun
     protected function getCommandOptions(): array
     {
         return [
-            'stdin-file-path' => $this->currentFile['fileName'] ?? $this->getStdinFilePath(),
+            'stdinFilePath' => [
+                'cliName' => 'stdin-file-path',
+                'type' => 'value',
+                'value' => $this->currentFile['fileName'] ?? $this->getStdinFilePath(),
+            ],
         ] + parent::getCommandOptions();
     }
 

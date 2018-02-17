@@ -39,13 +39,15 @@ class ScssLintRunFilesTest extends Unit
 
     public function testGetSetLintReporters(): void
     {
-        $task = new Task([
+        $options = [
             'lintReporters' => [
                 'aKey' => 'aValue',
             ],
-        ]);
+        ];
 
+        $task = new Task();
         $task
+            ->setOptions($options)
             ->addLintReporter('bKey', 'bValue')
             ->addLintReporter('cKey', 'cValue')
             ->removeLintReporter('bKey');
@@ -202,7 +204,8 @@ class ScssLintRunFilesTest extends Unit
      */
     public function testGetCommand(string $expected, array $options): void
     {
-        $task = new Task($options);
+        $task = new Task();
+        $task->setOptions($options);
         $this->tester->assertEquals($expected, $task->getCommand());
     }
 
@@ -305,12 +308,14 @@ class ScssLintRunFilesTest extends Unit
         int $numOfWarnings,
         int $lintExitCode
     ): void {
+        $options = [
+            'failOn' => $failOn,
+            'failOnNoFiles' => $failOnNoFiles,
+        ];
+
         /** @var Task $task */
-        $task = Stub::construct(
-            Task::class,
-            [['failOn' => $failOn, 'failOnNoFiles' => $failOnNoFiles]],
-            ['lintExitCode' => $lintExitCode]
-        );
+        $task = Stub::construct(Task::class, [], ['lintExitCode' => $lintExitCode]);
+        $task->setOptions($options);
 
         $this->tester->assertEquals(
             $expected,
@@ -413,11 +418,12 @@ class ScssLintRunFilesTest extends Unit
         /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRun $task */
         $task = Stub::construct(
             Task::class,
-            [$options, []],
+            [],
             [
                 'processClass' => DummyProcess::class,
             ]
         );
+        $task->setOptions($options);
 
         $processIndex = count(DummyProcess::$instances);
 
@@ -470,11 +476,12 @@ class ScssLintRunFilesTest extends Unit
         /** @var Task $task */
         $task = Stub::construct(
             Task::class,
-            [$options, []],
+            [],
             [
                 'container' => $container,
             ]
         );
+        $task->setOptions($options);
 
         $task->setLogger($container->get('logger'));
 

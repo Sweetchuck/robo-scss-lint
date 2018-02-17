@@ -596,10 +596,20 @@ class ScssLintRun extends BaseTask implements
         80 => 'Files glob patterns specified did not match any files.',
     ];
 
-    public function __construct(array $options = [])
-    {
-        $this->setOptions($options);
-    }
+    /**
+     * @var string
+     */
+    protected $cmdPattern = '';
+
+    /**
+     * @var array
+     */
+    protected $cmdArgs = [];
+
+    /**
+     * @var array
+     */
+    protected $cmdOptions = [];
 
     /**
      * @return $this
@@ -812,56 +822,112 @@ class ScssLintRun extends BaseTask implements
      */
     public function getCommand(): string
     {
-        $options = $this->getCommandOptions();
+        return $this
+            ->getCommandInit()
+            ->getCommandChangeDirectory()
+            ->getCommandPrefix()
+            ->getCommandBundle()
+            ->getCommandScssLintExecutable()
+            ->getCommandScssLintOptions()
+            ->getCommandBuild();
+    }
 
-        $cmdPattern = '';
-        $cmdArgs = [];
-        if ($this->getWorkingDirectory()) {
-            $cmdPattern .= 'cd %s && ';
-            $cmdArgs[] = escapeshellarg($this->getWorkingDirectory());
+    /**
+     * @return $this
+     */
+    protected function getCommandInit()
+    {
+        $this->cmdPattern = '';
+        $this->cmdArgs = [];
+        $this->cmdOptions = $this->getCommandOptions();
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function getCommandChangeDirectory()
+    {
+        if ($this->cmdOptions['workingDirectory']['value']) {
+            $this->cmdPattern .= 'cd %s && ';
+            $this->cmdArgs[] = escapeshellarg($this->cmdOptions['workingDirectory']['value']);
         }
 
-        if ($this->getBundleGemFile()) {
-            $cmdPattern .= 'BUNDLE_GEMFILE=%s ';
-            $cmdArgs[] = escapeshellarg($this->getBundleGemFile());
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function getCommandPrefix()
+    {
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function getCommandBundle()
+    {
+        if ($this->cmdOptions['bundleGemFile']['value']) {
+            $this->cmdPattern .= 'BUNDLE_GEMFILE=%s ';
+            $this->cmdArgs[] = escapeshellarg($this->cmdOptions['bundleGemFile']['value']);
         }
 
-        if ($this->getBundleExecutable()) {
-            $cmdPattern .= '%s exec ';
-            $cmdArgs[] = escapeshellcmd($this->getBundleExecutable());
+        if ($this->cmdOptions['bundleExecutable']['value']) {
+            $this->cmdPattern .= '%s exec ';
+            $this->cmdArgs[] = escapeshellcmd($this->cmdOptions['bundleExecutable']['value']);
         }
 
-        $cmdPattern .= escapeshellcmd($this->getScssLintExecutable());
+        return $this;
+    }
 
-        foreach ($options as $optionName => $option) {
+    /**
+     * @return $this
+     */
+    protected function getCommandScssLintExecutable()
+    {
+        $this->cmdPattern .= '%s';
+        $this->cmdArgs[] = escapeshellcmd($this->cmdOptions['scssLintExecutable']['value']);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function getCommandScssLintOptions()
+    {
+        foreach ($this->cmdOptions as $optionName => $option) {
             $optionNameCli = $option['cliName'] ?? $optionName;
             switch ($option['type']) {
                 case 'value':
                     if ($option['value']) {
-                        $cmdPattern .= " --$optionNameCli=%s";
-                        $cmdArgs[] = escapeshellarg($option['value']);
+                        $this->cmdPattern .= " --$optionNameCli=%s";
+                        $this->cmdArgs[] = escapeshellarg($option['value']);
                     }
                     break;
 
                 case 'multi-value':
                     $values = array_keys($option['value'], true, true);
-                    $cmdPattern .= str_repeat(" --$optionNameCli=%s", count($values));
+                    $this->cmdPattern .= str_repeat(" --$optionNameCli=%s", count($values));
                     foreach ($values as $value) {
-                        $cmdArgs[] = escapeshellarg($value);
+                        $this->cmdArgs[] = escapeshellarg($value);
                     }
                     break;
 
                 case 'list':
                     $values = array_keys($option['value'], true, true);
                     if ($values) {
-                        $cmdPattern .= " --$optionNameCli=%s";
-                        $cmdArgs[] = escapeshellarg(implode(',', $values));
+                        $this->cmdPattern .= " --$optionNameCli=%s";
+                        $this->cmdArgs[] = escapeshellarg(implode(',', $values));
                     }
                     break;
 
                 case 'tri-state':
                     if ($option['value'] !== null) {
-                        $cmdPattern .= $option['value'] ? " --$optionNameCli" : " --no-$optionNameCli";
+                        $this->cmdPattern .= $option['value'] ? " --$optionNameCli" : " --no-$optionNameCli";
                     }
                     break;
 
@@ -869,8 +935,8 @@ class ScssLintRun extends BaseTask implements
                     foreach (['include' => true, 'exclude' => false] as $optionNamePrefix => $filter) {
                         $values = array_keys($option['value'], $filter, true);
                         if ($values) {
-                            $cmdPattern .= " --$optionNamePrefix-$optionNameCli=%s";
-                            $cmdArgs[] = escapeshellarg(implode(',', $values));
+                            $this->cmdPattern .= " --$optionNamePrefix-$optionNameCli=%s";
+                            $this->cmdArgs[] = escapeshellarg(implode(',', $values));
                         }
                     }
                     break;
@@ -880,19 +946,40 @@ class ScssLintRun extends BaseTask implements
         if ($this->addFilesToCliCommand) {
             $paths = Utils::filterEnabled($this->getPaths());
             if ($paths) {
-                $cmdPattern .= ' --' . str_repeat(' %s', count($paths));
+                $this->cmdPattern .= ' --' . str_repeat(' %s', count($paths));
                 foreach ($paths as $path) {
-                    $cmdArgs[] = escapeshellarg($path);
+                    $this->cmdArgs[] = escapeshellarg($path);
                 }
             }
         }
 
-        return vsprintf($cmdPattern, $cmdArgs);
+        return $this;
+    }
+
+    protected function getCommandBuild(): string
+    {
+        return vsprintf($this->cmdPattern, $this->cmdArgs);
     }
 
     protected function getCommandOptions(): array
     {
         return [
+            'workingDirectory' => [
+                'type' => 'other',
+                'value' => $this->getWorkingDirectory(),
+            ],
+            'bundleGemFile' => [
+                'type' => 'other',
+                'value' => $this->getBundleGemFile(),
+            ],
+            'bundleExecutable' => [
+                'type' => 'other',
+                'value' => $this->getBundleExecutable(),
+            ],
+            'scssLintExecutable' => [
+                'type' => 'other',
+                'value' => $this->getScssLintExecutable(),
+            ],
             'format' => [
                 'type' => 'value',
                 'value' => $this->getFormat(),

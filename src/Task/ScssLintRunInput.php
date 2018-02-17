@@ -52,12 +52,8 @@ class ScssLintRunInput extends ScssLintRun
     public function setOptions(array $options)
     {
         parent::setOptions($options);
-        foreach ($options as $name => $value) {
-            switch ($name) {
-                case 'stdinFilePath':
-                    $this->setStdinFilePath($value);
-                    break;
-            }
+        if (isset($options['stdinFilePath'])) {
+            $this->setStdinFilePath($options['stdinFilePath']);
         }
 
         return $this;
@@ -106,16 +102,16 @@ class ScssLintRunInput extends ScssLintRun
     /**
      * {@inheritdoc}
      */
-    public function getCommand(): string
+    protected function getCommandPrefix()
     {
-        if ($this->currentFile['content'] === null) {
-            // @todo Handle the different working directories.
-            $echo = $this->currentFile['command'];
+        if ($this->currentFile['content'] !== null) {
+            $this->cmdPattern .= 'echo -n %s | ';
+            $this->cmdArgs[] = escapeshellarg($this->currentFile['content']);
         } else {
-            $echo = sprintf('echo -n %s', escapeshellarg($this->currentFile['content']));
+            $this->cmdPattern .= $this->currentFile['command'] . ' | ';
         }
 
-        return $echo . ' | ' . parent::getCommand();
+        return $this;
     }
 
     /**

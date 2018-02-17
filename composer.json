@@ -1,7 +1,7 @@
 {
     "name": "sweetchuck/robo-scss-lint",
     "description": "Robo task wrapper for scss-lint",
-    "license": "GPL-2.0+",
+    "license": "GPL-2.0-or-later",
     "config": {
         "bin-dir": "bin",
         "sort-packages": true

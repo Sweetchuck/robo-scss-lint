@@ -6,7 +6,7 @@ use Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput as Task;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use Sweetchuck\Codeception\Module\RoboTaskRunner\DummyOutput;
-use Sweetchuck\Robo\ScssLint\Test\Helper\Dummy\Process as DummyProcess;
+use Sweetchuck\Codeception\Module\RoboTaskRunner\DummyProcess;
 use Robo\Robo;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -41,7 +41,9 @@ class ScssLintRunInputTest extends Unit
         $options = [
             'stdinFilePath' => 'abc',
         ];
-        $task = new Task($options);
+
+        $task = new Task();
+        $task->setOptions($options);
 
         $this->tester->assertEquals($options['stdinFilePath'], $task->getStdinFilePath());
     }
@@ -49,7 +51,7 @@ class ScssLintRunInputTest extends Unit
     public function casesGetCommand(): array
     {
         return [
-            'with content' => [
+            'with content; without workingDirectory' => [
                 "echo -n 'content-01' | bundle exec scss-lint --stdin-file-path='a.scss'",
                 [
                     'stdinFilePath' => 'a.scss',
@@ -60,9 +62,33 @@ class ScssLintRunInputTest extends Unit
                     'command' => 'git show :a.scss',
                 ],
             ],
-            'without content' => [
+            'with content; with workingDirectory' => [
+                "cd 'my-dir' && echo -n 'content-01' | bundle exec scss-lint --stdin-file-path='a.scss'",
+                [
+                    'workingDirectory' => 'my-dir',
+                    'stdinFilePath' => 'a.scss',
+                ],
+                [
+                    'fileName' => 'a.scss',
+                    'content' => 'content-01',
+                    'command' => 'git show :a.scss',
+                ],
+            ],
+            'without content; without workingDirectory' => [
                 "git show :a.scss | bundle exec scss-lint --stdin-file-path='a.scss'",
                 [
+                    'stdinPath' => 'a.scss',
+                ],
+                [
+                    'fileName' => 'a.scss',
+                    'content' => null,
+                    'command' => "git show :a.scss",
+                ],
+            ],
+            'without content; with workingDirectory' => [
+                "cd 'my-dir' && git show :a.scss | bundle exec scss-lint --stdin-file-path='a.scss'",
+                [
+                    'workingDirectory' => 'my-dir',
                     'stdinPath' => 'a.scss',
                 ],
                 [
@@ -82,11 +108,13 @@ class ScssLintRunInputTest extends Unit
         /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput $task */
         $task = Stub::construct(
             Task::class,
-            [$options],
+            [],
             [
                 'currentFile' => $currentFile,
             ]
         );
+
+        $task->setOptions($options);
 
         $this->tester->assertEquals($expected, $task->getCommand());
     }
@@ -227,11 +255,8 @@ class ScssLintRunInputTest extends Unit
         $properties += ['processClass' => DummyProcess::class];
 
         /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRunInput $task */
-        $task = Stub::construct(
-            Task::class,
-            [$options],
-            $properties
-        );
+        $task = Stub::construct(Task::class, [], $properties);
+        $task->setOptions($options);
 
         $processIndex = count(DummyProcess::$instances);
         foreach ($files as $file) {

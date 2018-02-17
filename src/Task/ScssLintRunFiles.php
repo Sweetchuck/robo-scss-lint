@@ -5,13 +5,16 @@ namespace Sweetchuck\Robo\ScssLint\Task;
 class ScssLintRunFiles extends ScssLintRun
 {
     /**
-     * @return string
+     * {@inheritdoc}
      */
     protected function getTaskInfoPattern()
     {
         return '{name} runs "<info>{command}</info>" command';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function getTaskContext($context = null)
     {
         return [

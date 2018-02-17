@@ -20,15 +20,15 @@ class ScssLintRoboFile extends Tasks
     protected $reportsDir = 'actual';
 
     /**
-     * @return $this
+     * {@inheritdoc}
      */
     public function setContainer(ContainerInterface $container)
     {
-        $this->container = $container;
+        if (!$container->has('lintCheckstyleReporter')) {
+            BaseReporter::lintReportConfigureContainer($container);
+        }
 
-        BaseReporter::lintReportConfigureContainer($this->container);
-
-        return $this;
+        return parent::setContainer($container);
     }
 
     /**
@@ -36,7 +36,8 @@ class ScssLintRoboFile extends Tasks
      */
     public function lintFilesDefaultStdOutput()
     {
-        return $this->taskScssLintRunFiles()
+        return $this
+            ->taskScssLintRunFiles()
             ->setPaths(['fixtures/'])
             ->setFormat('Default');
     }
@@ -46,7 +47,8 @@ class ScssLintRoboFile extends Tasks
      */
     public function lintFilesDefaultFile()
     {
-        return $this->taskScssLintRunFiles()
+        return $this
+            ->taskScssLintRunFiles()
             ->setPaths(['fixtures/'])
             ->setFormat('Default')
             ->setOut("{$this->reportsDir}/native.default.txt");
@@ -57,17 +59,16 @@ class ScssLintRoboFile extends Tasks
      */
     public function lintFilesAllInOne()
     {
-        $verboseFile = new VerboseReporter();
-        $verboseFile
+        $verboseFile = (new VerboseReporter())
             ->setFilePathStyle('relative')
             ->setDestination("{$this->reportsDir}/extra.verbose.txt");
 
-        $summaryFile = new SummaryReporter();
-        $summaryFile
+        $summaryFile = (new SummaryReporter())
             ->setFilePathStyle('relative')
             ->setDestination("{$this->reportsDir}/extra.summary.txt");
 
-        return $this->taskScssLintRunFiles()
+        return $this
+            ->taskScssLintRunFiles()
             ->setPaths(['fixtures/'])
             ->setFormat('JSON')
             ->setFailOn('warning')
@@ -119,7 +120,8 @@ class ScssLintRoboFile extends Tasks
             }
         }
 
-        return $this->taskScssLintRunInput()
+        return $this
+            ->taskScssLintRunInput()
             ->setPaths($files)
             ->addLintReporter('verbose:StdOutput', 'lintVerboseReporter')
             ->addLintReporter('verbose:file', $verboseFile)

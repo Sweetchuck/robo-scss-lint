@@ -2,6 +2,7 @@
 
 namespace Sweetchuck\Robo\ScssLint\Task;
 
+use Robo\TaskInfo;
 use Sweetchuck\LintReport\ReporterInterface;
 use Sweetchuck\Robo\ScssLint\LintReportWrapper\ReportWrapper;
 use Sweetchuck\Robo\ScssLint\Utils;
@@ -49,6 +50,11 @@ class ScssLintRun extends BaseTask implements
      * No SCSS files matched by the patterns.
      */
     const EXIT_CODE_NO_FILES = 80;
+
+    /**
+     * @var string
+     */
+    protected $taskName = '';
 
     /**
      * @todo Some kind of dependency injection would be awesome.
@@ -107,6 +113,28 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
+    // region Option - rubyExecutable
+    /**
+     * @var string
+     */
+    protected $rubyExecutable = '';
+
+    public function getRubyExecutable(): string
+    {
+        return $this->rubyExecutable;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setRubyExecutable(string $value)
+    {
+        $this->rubyExecutable = $value;
+
+        return $this;
+    }
+    // endregion
+
     // region Option - bundleGemFile.
     /**
      * @var string
@@ -135,7 +163,7 @@ class ScssLintRun extends BaseTask implements
      */
     protected $bundleExecutable = 'bundle';
 
-    protected function getBundleExecutable(): string
+    public function getBundleExecutable(): string
     {
         return $this->bundleExecutable;
     }
@@ -143,7 +171,7 @@ class ScssLintRun extends BaseTask implements
     /**
      * @return $this
      */
-    protected function setBundleExecutable(string $value)
+    public function setBundleExecutable(string $value)
     {
         $this->bundleExecutable = $value;
 
@@ -626,6 +654,10 @@ class ScssLintRun extends BaseTask implements
                     $this->setWorkingDirectory($value);
                     break;
 
+                case 'rubyExecutable':
+                    $this->setRubyExecutable($value);
+                    break;
+
                 case 'bundleGemFile':
                     $this->setBundleGemFile($value);
                     break;
@@ -754,7 +786,7 @@ class ScssLintRun extends BaseTask implements
         $this->reportWrapper = null;
         $this->lintExitCode = static::EXIT_CODE_OK;
 
-        /** @var Process $process */
+        /** @var \Symfony\Component\Process\Process $process */
         $process = new $this->processClass($this->getCommand());
 
         $this->lintExitCode = $process->run();
@@ -784,7 +816,9 @@ class ScssLintRun extends BaseTask implements
     protected function runReleaseLintReports()
     {
         if ($this->isLintStdOutputPublic) {
-            $this->output()->write($this->lintStdOutput);
+            $this
+                ->output()
+                ->write($this->lintStdOutput);
         }
 
         if ($this->reportWrapper) {
@@ -826,6 +860,8 @@ class ScssLintRun extends BaseTask implements
             ->getCommandInit()
             ->getCommandChangeDirectory()
             ->getCommandPrefix()
+            ->getCommandEnvironmentVariables()
+            ->getCommandRuby()
             ->getCommandBundle()
             ->getCommandScssLintExecutable()
             ->getCommandScssLintOptions()
@@ -865,16 +901,34 @@ class ScssLintRun extends BaseTask implements
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    protected function getCommandBundle()
+    protected function getCommandEnvironmentVariables()
     {
         if ($this->cmdOptions['bundleGemFile']['value']) {
             $this->cmdPattern .= 'BUNDLE_GEMFILE=%s ';
             $this->cmdArgs[] = escapeshellarg($this->cmdOptions['bundleGemFile']['value']);
         }
 
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function getCommandRuby()
+    {
+        if ($this->cmdOptions['rubyExecutable']['value']) {
+            $this->cmdPattern .= '%s ';
+            $this->cmdArgs[] = escapeshellcmd($this->cmdOptions['rubyExecutable']['value']);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function getCommandBundle()
+    {
         if ($this->cmdOptions['bundleExecutable']['value']) {
             $this->cmdPattern .= '%s exec ';
             $this->cmdArgs[] = escapeshellcmd($this->cmdOptions['bundleExecutable']['value']);
@@ -967,6 +1021,10 @@ class ScssLintRun extends BaseTask implements
             'workingDirectory' => [
                 'type' => 'other',
                 'value' => $this->getWorkingDirectory(),
+            ],
+            'rubyExecutable' => [
+                'type' => 'other',
+                'value' => $this->getRubyExecutable(),
             ],
             'bundleGemFile' => [
                 'type' => 'other',
@@ -1131,6 +1189,27 @@ class ScssLintRun extends BaseTask implements
      */
     protected function getTaskInfoPattern()
     {
-        return "{name} is linting files";
+        return 'is linting files';
+    }
+
+    public function getTaskName(): string
+    {
+        return $this->taskName ?: TaskInfo::formatTaskName($this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getTaskContext($context = null)
+    {
+        if (!$context) {
+            $context = [];
+        }
+
+        if (empty($context['name'])) {
+            $context['name'] = $this->getTaskName();
+        }
+
+        return parent::getTaskContext($context);
     }
 }

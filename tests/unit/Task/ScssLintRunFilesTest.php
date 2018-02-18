@@ -72,6 +72,14 @@ class ScssLintRunFilesTest extends Unit
                 "cd 'my-dir' && bundle exec scss-lint",
                 ['workingDirectory' => 'my-dir'],
             ],
+            'ruby-executable safe' => [
+                "my-ruby bundle exec scss-lint",
+                ['rubyExecutable' => 'my-ruby'],
+            ],
+            'ruby-executable escape' => [
+                "my\\\$ruby bundle exec scss-lint",
+                ['rubyExecutable' => 'my$ruby'],
+            ],
             'bundle-gem-file' => [
                 "BUNDLE_GEMFILE='a/b/Gemfile' bundle exec scss-lint",
                 ['bundleGemFile' => 'a/b/Gemfile'],
@@ -83,6 +91,15 @@ class ScssLintRunFilesTest extends Unit
             'bundleExecutable-other' => [
                 'my-bundle exec scss-lint',
                 ['bundleExecutable' => 'my-bundle'],
+            ],
+            'complex-executable' => [
+                "cd 'my-dir' && BUNDLE_GEMFILE='my-gem-file' my-ruby my-bundle exec scss-lint",
+                [
+                    'workingDirectory' => 'my-dir',
+                    'bundleGemFile' => 'my-gem-file',
+                    'rubyExecutable' => 'my-ruby',
+                    'bundleExecutable' => 'my-bundle',
+                ],
             ],
             'scssLintExecutable-other' => [
                 'my-scss-lint',

@@ -9,6 +9,11 @@ class ScssLintRunInput extends ScssLintRun
     /**
      * {@inheritdoc}
      */
+    protected $taskName = 'SCSS lint - Input';
+
+    /**
+     * {@inheritdoc}
+     */
     protected $addFilesToCliCommand = false;
 
     /**
@@ -133,7 +138,7 @@ class ScssLintRunInput extends ScssLintRun
      */
     protected function getTaskInfoPattern()
     {
-        return "{name} is linting <info>{count}</info> files from StdInput";
+        return 'is linting <info>{count}</info> files from StdInput';
     }
 
     /**

@@ -63,9 +63,9 @@ class ScssLintRun extends BaseTask implements
      */
     protected $processClass = Process::class;
 
-    // region Options.
+    // region Options
 
-    // region Option - assetNamePrefix.
+    // region assetNamePrefix
     /**
      * @var string
      */
@@ -87,7 +87,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - workingDirectory.
+    // region workingDirectory
     /**
      * Directory to step in before run the `scss-lint`.
      *
@@ -113,7 +113,71 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - rubyExecutable
+    // region envVarPath
+    /**
+     * @var array
+     */
+    protected $envVarPath = [];
+
+    public function getEnvVarPath(): array
+    {
+        return $this->envVarPath;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setEnvVarPath(array $paths)
+    {
+        $this->envVarPath = $this->createIncludeList($paths, true);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function addEnvVarPath(string $path)
+    {
+        $this->envVarPath[$path] = true;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function removeEnvVarPath(string $path)
+    {
+        unset($this->envVarPath[$path]);
+
+        return $this;
+    }
+    // endregion
+
+    // region envVarBundleGemFile
+    /**
+     * @var string
+     */
+    protected $envVarBundleGemFile = '';
+
+    public function getEnvVarBundleGemFile(): string
+    {
+        return $this->envVarBundleGemFile;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setEnvVarBundleGemFile(string $envVarBundleGemFile)
+    {
+        $this->envVarBundleGemFile = $envVarBundleGemFile;
+
+        return $this;
+    }
+    // endregion
+
+    // region rubyExecutable
     /**
      * @var string
      */
@@ -135,29 +199,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - bundleGemFile.
-    /**
-     * @var string
-     */
-    protected $bundleGemFile = '';
-
-    public function getBundleGemFile(): string
-    {
-        return $this->bundleGemFile;
-    }
-
-    /**
-     * @return $this
-     */
-    public function setBundleGemFile(string $bundleGemFile)
-    {
-        $this->bundleGemFile = $bundleGemFile;
-
-        return $this;
-    }
-    // endregion
-
-    // region Option - bundleExecutable.
+    // region bundleExecutable
     /**
      * @var string
      */
@@ -179,7 +221,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - scssLintExecutable.
+    // region scssLintExecutable
     /**
      * @var string
      */
@@ -201,7 +243,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - failOn.
+    // region failOn
     /**
      * Severity level.
      *
@@ -230,7 +272,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - failOnNoFiles.
+    // region failOnNoFiles
     /**
      * Fail if there is no SCSS file to lint.
      *
@@ -256,7 +298,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - lintReporters.
+    // region lintReporters
     /**
      * @var \Sweetchuck\LintReport\ReporterInterface[]
      */
@@ -306,7 +348,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - format.
+    // region format
     /**
      * Specify how to display lints.
      *
@@ -342,7 +384,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - requires.
+    // region requires
     /**
      * Required Ruby files.
      *
@@ -377,7 +419,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - linters.
+    // region linters
     /**
      * Linters to include or exclude.
      *
@@ -412,7 +454,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - configFile.
+    // region configFile
     /**
      * Config file path.
      *
@@ -438,7 +480,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - exclude.
+    // region exclude
     /**
      * SCSS files to exclude.
      *
@@ -473,7 +515,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - out.
+    // region out
     /**
      * Write output to a file instead of STDOUT.
      *
@@ -501,7 +543,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - colorize.
+    // region colorize
     /**
      * Force output to be colorized.
      *
@@ -527,7 +569,7 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region Option - paths.
+    // region paths
     /**
      * SCSS files to check.
      *
@@ -555,6 +597,7 @@ class ScssLintRun extends BaseTask implements
         return $this;
     }
     // endregion
+
     // endregion
 
     /**
@@ -654,12 +697,16 @@ class ScssLintRun extends BaseTask implements
                     $this->setWorkingDirectory($value);
                     break;
 
-                case 'rubyExecutable':
-                    $this->setRubyExecutable($value);
+                case 'envVarPath':
+                    $this->setEnvVarPath($value);
                     break;
 
-                case 'bundleGemFile':
-                    $this->setBundleGemFile($value);
+                case 'envVarBundleGemFile':
+                    $this->setEnvVarBundleGemFile($value);
+                    break;
+
+                case 'rubyExecutable':
+                    $this->setRubyExecutable($value);
                     break;
 
                 case 'bundleExecutable':
@@ -903,9 +950,15 @@ class ScssLintRun extends BaseTask implements
 
     protected function getCommandEnvironmentVariables()
     {
-        if ($this->cmdOptions['bundleGemFile']['value']) {
+        $paths = Utils::filterEnabled($this->cmdOptions['envVarPath']['value']);
+        if ($paths) {
+            $this->cmdPattern .= 'PATH=%s ';
+            $this->cmdArgs[] = escapeshellarg(implode(':', $paths));
+        }
+
+        if ($this->cmdOptions['envVarBundleGemFile']['value']) {
             $this->cmdPattern .= 'BUNDLE_GEMFILE=%s ';
-            $this->cmdArgs[] = escapeshellarg($this->cmdOptions['bundleGemFile']['value']);
+            $this->cmdArgs[] = escapeshellarg($this->cmdOptions['envVarBundleGemFile']['value']);
         }
 
         return $this;
@@ -1022,13 +1075,18 @@ class ScssLintRun extends BaseTask implements
                 'type' => 'other',
                 'value' => $this->getWorkingDirectory(),
             ],
+            'envVarPath' => [
+                'type' => 'other',
+                'name' => 'PATH',
+                'value' => $this->getEnvVarPath(),
+            ],
+            'envVarBundleGemFile' => [
+                'type' => 'other',
+                'value' => $this->getEnvVarBundleGemFile(),
+            ],
             'rubyExecutable' => [
                 'type' => 'other',
                 'value' => $this->getRubyExecutable(),
-            ],
-            'bundleGemFile' => [
-                'type' => 'other',
-                'value' => $this->getBundleGemFile(),
             ],
             'bundleExecutable' => [
                 'type' => 'other',

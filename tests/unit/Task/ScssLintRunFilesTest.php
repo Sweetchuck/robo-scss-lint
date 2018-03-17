@@ -80,9 +80,28 @@ class ScssLintRunFilesTest extends Unit
                 "my\\\$ruby bundle exec scss-lint",
                 ['rubyExecutable' => 'my$ruby'],
             ],
-            'bundle-gem-file' => [
+            'env-var-path vector' => [
+                "PATH='/a/b/c:/d/e' bundle exec scss-lint",
+                [
+                    'envVarPath' => [
+                        '/a/b/c',
+                        '/d/e'
+                    ],
+                ],
+            ],
+            'env-var-path assoc' => [
+                "PATH='/a/b/c:/d/e' bundle exec scss-lint",
+                [
+                    'envVarPath' => [
+                        '/a/b/c' => true,
+                        '/d/e' => true,
+                        '/f/g' => false,
+                    ],
+                ],
+            ],
+            'env-var-bundle-gem-file' => [
                 "BUNDLE_GEMFILE='a/b/Gemfile' bundle exec scss-lint",
-                ['bundleGemFile' => 'a/b/Gemfile'],
+                ['envVarBundleGemFile' => 'a/b/Gemfile'],
             ],
             'bundleExecutable-empty' => [
                 'scss-lint',
@@ -93,10 +112,11 @@ class ScssLintRunFilesTest extends Unit
                 ['bundleExecutable' => 'my-bundle'],
             ],
             'complex-executable' => [
-                "cd 'my-dir' && BUNDLE_GEMFILE='my-gem-file' my-ruby my-bundle exec scss-lint",
+                "cd 'my-dir' && PATH='/a:/b' BUNDLE_GEMFILE='my-gem-file' my-ruby my-bundle exec scss-lint",
                 [
                     'workingDirectory' => 'my-dir',
-                    'bundleGemFile' => 'my-gem-file',
+                    'envVarPath' => ['/a', '/b'],
+                    'envVarBundleGemFile' => 'my-gem-file',
                     'rubyExecutable' => 'my-ruby',
                     'bundleExecutable' => 'my-bundle',
                 ],

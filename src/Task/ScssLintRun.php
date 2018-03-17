@@ -953,7 +953,7 @@ class ScssLintRun extends BaseTask implements
         $paths = Utils::filterEnabled($this->cmdOptions['envVarPath']['value']);
         if ($paths) {
             $this->cmdPattern .= 'PATH=%s ';
-            $this->cmdArgs[] = escapeshellarg(implode(':', $paths));
+            $this->cmdArgs[] = escapeshellarg(implode(PATH_SEPARATOR, $paths));
         }
 
         if ($this->cmdOptions['envVarBundleGemFile']['value']) {

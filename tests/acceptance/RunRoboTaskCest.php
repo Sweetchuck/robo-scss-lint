@@ -28,14 +28,11 @@ class RunRoboTaskCest
     {
         $id = __METHOD__;
 
-        $cwd = getcwd();
-        chdir(codecept_data_dir());
         $i->runRoboTask(
             $id,
             ScssLintRoboFile::class,
             'lint:files-all-in-one'
         );
-        chdir($cwd);
 
         $exitCode = $i->getRoboTaskExitCode($id);
         $stdOutput = $i->getRoboTaskStdOutput($id);
@@ -63,22 +60,27 @@ class RunRoboTaskCest
     {
         $id = __METHOD__;
 
-        $cwd = getcwd();
-        chdir(codecept_data_dir());
         $i->runRoboTask(
             $id,
             ScssLintRoboFile::class,
             'lint:files-default-file'
         );
-        chdir($cwd);
 
         $exitCode = $i->getRoboTaskExitCode($id);
+        $stdOutput = $i->getRoboTaskStdOutput($id);
         $stdError = $i->getRoboTaskStdError($id);
 
         $i->assertEquals(2, $exitCode);
+        $i->assertEquals(
+            '',
+            $stdOutput,
+            'stdOutput equals'
+        );
+
         $i->assertContains(
             'One or more errors were reported (and any number of warnings)',
-            $stdError
+            $stdError,
+            'stdError contains'
         );
         $i->haveAFileLikeThis('native.default.txt');
     }
@@ -87,14 +89,11 @@ class RunRoboTaskCest
     {
         $id = __METHOD__;
 
-        $cwd = getcwd();
-        chdir(codecept_data_dir());
         $i->runRoboTask(
             $id,
             ScssLintRoboFile::class,
             'lint:files-default-std-output'
         );
-        chdir($cwd);
 
         $exitCode = $i->getRoboTaskExitCode($id);
         $stdOutput = $i->getRoboTaskStdOutput($id);
@@ -136,15 +135,12 @@ class RunRoboTaskCest
 
         $i->wantTo("Run Robo task '<comment>$id</comment>'.");
 
-        $cwd = getcwd();
-        chdir(codecept_data_dir());
         $i->runRoboTask(
             $id,
             ScssLintRoboFile::class,
             $roboTaskName,
             ...$argsAndOptions
         );
-        chdir($cwd);
 
         $exitCode = $i->getRoboTaskExitCode($id);
         $stdError = $i->getRoboTaskStdError($id);

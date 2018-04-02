@@ -9,15 +9,11 @@ use Sweetchuck\LintReport\Reporter\SummaryReporter;
 use Sweetchuck\LintReport\Reporter\VerboseReporter;
 use League\Container\ContainerInterface;
 use Sweetchuck\Robo\ScssLint\ScssLintTaskLoader;
+use Webmozart\PathUtil\Path;
 
 class ScssLintRoboFile extends Tasks
 {
     use ScssLintTaskLoader;
-
-    /**
-     * @var string
-     */
-    protected $reportsDir = 'actual';
 
     /**
      * {@inheritdoc}
@@ -36,10 +32,14 @@ class ScssLintRoboFile extends Tasks
      */
     public function lintFilesDefaultStdOutput()
     {
+        $dataDir = $this->getDataDir();
+
         return $this
             ->taskScssLintRunFiles()
-            ->setPaths(['fixtures/'])
-            ->setFormat('Default');
+            ->setConfigFile("$dataDir/.scss-lint.yml")
+            ->setFormat('Default')
+            ->setPaths(["$dataDir/fixtures/"])
+            ;
     }
 
     /**
@@ -47,11 +47,14 @@ class ScssLintRoboFile extends Tasks
      */
     public function lintFilesDefaultFile()
     {
+        $dataDir = $this->getDataDir();
+
         return $this
             ->taskScssLintRunFiles()
-            ->setPaths(['fixtures/'])
+            ->setConfigFile("$dataDir/.scss-lint.yml")
             ->setFormat('Default')
-            ->setOut("{$this->reportsDir}/native.default.txt");
+            ->setOut("$dataDir/actual/native.default.txt")
+            ->setPaths(["$dataDir/fixtures"]);
     }
 
     /**
@@ -59,18 +62,21 @@ class ScssLintRoboFile extends Tasks
      */
     public function lintFilesAllInOne()
     {
+        $dataDir = $this->getDataDir();
+
         $verboseFile = (new VerboseReporter())
             ->setFilePathStyle('relative')
-            ->setDestination("{$this->reportsDir}/extra.verbose.txt");
+            ->setDestination("$dataDir/actual/extra.verbose.txt");
 
         $summaryFile = (new SummaryReporter())
             ->setFilePathStyle('relative')
-            ->setDestination("{$this->reportsDir}/extra.summary.txt");
+            ->setDestination("$dataDir/actual/extra.summary.txt");
 
         return $this
             ->taskScssLintRunFiles()
-            ->setPaths(['fixtures/'])
+            ->setPaths(["$dataDir/fixtures/"])
             ->setFormat('JSON')
+            ->setConfigFile("$dataDir/.scss-lint.yml")
             ->setFailOn('warning')
             ->addLintReporter('verbose:StdOutput', 'lintVerboseReporter')
             ->addLintReporter('verbose:file', $verboseFile)
@@ -86,47 +92,59 @@ class ScssLintRoboFile extends Tasks
             'command-only' => false,
         ]
     ) {
-        $fixturesDir = 'fixtures';
-        $reportsDir = 'actual';
+        $dataDir = $this->getDataDir();
 
         $verboseFile = (new VerboseReporter())
             ->setFilePathStyle('relative')
-            ->setDestination("$reportsDir/input.verbose.txt");
+            ->setDestination("$dataDir/actual/input.verbose.txt");
 
         $summaryFile = (new SummaryReporter())
             ->setFilePathStyle('relative')
-            ->setDestination("$reportsDir/input.summary.txt");
+            ->setDestination("$dataDir/actual/input.summary.txt");
 
         $checkstyleFile = (new CheckstyleReporter())
             ->setFilePathStyle('relative')
-            ->setDestination("$reportsDir/input.checkstyle.xml");
+            ->setDestination("$dataDir/actual/input.checkstyle.xml");
 
         $files = [
             'invalid.01.scss' => [
                 'fileName' => 'invalid.01.scss',
-                'command' => "cat $fixturesDir/invalid.01.scss",
+                'command' => sprintf('cat %s', escapeshellarg("$dataDir/fixtures/invalid.01.scss")),
                 'content' => null,
             ],
             'invalid.02.scss' => [
                 'fileName' => 'invalid.02.scss',
-                'command' => "cat $fixturesDir/invalid.02.scss",
+                'command' => sprintf('cat %s', escapeshellarg("$dataDir/fixtures/invalid.02.scss")),
                 'content' => null,
             ],
         ];
 
         if (!$options['command-only']) {
             foreach ($files as $fileName => $file) {
-                $files[$fileName]['content'] = file_get_contents("$fixturesDir/$fileName");
+                $files[$fileName]['content'] = file_get_contents("$dataDir/fixtures/$fileName");
             }
         }
 
         return $this
             ->taskScssLintRunInput()
+            ->setConfigFile("$dataDir/.scss-lint.yml")
             ->setPaths($files)
             ->addLintReporter('verbose:StdOutput', 'lintVerboseReporter')
             ->addLintReporter('verbose:file', $verboseFile)
             ->addLintReporter('summary:StdOutput', 'lintSummaryReporter')
             ->addLintReporter('summary:file', $summaryFile)
             ->addLintReporter('checkstyle:file', $checkstyleFile);
+    }
+
+    protected function getProjectRootDir(): string
+    {
+        return Path::canonicalize(__DIR__ . '/../../../..');
+    }
+
+    protected function getDataDir(): string
+    {
+        $root = $this->getProjectRootDir();
+
+        return Path::makeRelative("$root/tests/_data", getcwd());
     }
 }

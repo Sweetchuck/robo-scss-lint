@@ -47,9 +47,14 @@ class ScssLintRun extends BaseTask implements
     const EXIT_CODE_UNKNOWN = 4;
 
     /**
+     * One or more files specified were not found.
+     */
+    const EXIT_CODE_FILE_NOT_FOUND = 66;
+
+    /**
      * No SCSS files matched by the patterns.
      */
-    const EXIT_CODE_NO_FILES = 80;
+    const EXIT_CODE_GLOB_DID_NOT_MATCH = 80;
 
     /**
      * @var string
@@ -249,7 +254,7 @@ class ScssLintRun extends BaseTask implements
      *
      * @var string
      */
-    protected $failOn = 'error';
+    protected $failOn = 'warning';
 
     public function getFailOn(): string
     {
@@ -272,17 +277,39 @@ class ScssLintRun extends BaseTask implements
     }
     // endregion
 
-    // region failOnNoFiles
+    // region failOnFileNotFound
+    /**
+     * @var bool
+     */
+    protected $failOnFileNotFound = false;
+
+    public function getFailOnFileNotFound(): bool
+    {
+        return $this->failOnFileNotFound;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setFailOnFileNotFound(bool $value)
+    {
+        $this->failOnFileNotFound = $value;
+
+        return $this;
+    }
+    // endregion
+
+    // region failOnGlobDidNotMatch
     /**
      * Fail if there is no SCSS file to lint.
      *
      * @var bool
      */
-    protected $failOnNoFiles = false;
+    protected $failOnGlobDidNotMatch = false;
 
-    public function getFailOnNoFiles(): bool
+    public function getFailOnGlobDidNotMatch(): bool
     {
-        return $this->failOnNoFiles;
+        return $this->failOnGlobDidNotMatch;
     }
 
     /**
@@ -290,9 +317,9 @@ class ScssLintRun extends BaseTask implements
      *
      * @return $this
      */
-    public function setFailOnNoFiles(bool $value)
+    public function setFailOnGlobDidNotMatch(bool $value)
     {
-        $this->failOnNoFiles = $value;
+        $this->failOnGlobDidNotMatch = $value;
 
         return $this;
     }
@@ -721,8 +748,12 @@ class ScssLintRun extends BaseTask implements
                     $this->setFailOn($value);
                     break;
 
-                case 'failOnNoFiles':
-                    $this->setFailOnNoFiles($value);
+                case 'failOnFileNotFound':
+                    $this->setFailOnFileNotFound($value);
+                    break;
+
+                case 'failOnGlobDidNotMatch':
+                    $this->setFailOnGlobDidNotMatch($value);
                     break;
 
                 case 'lintReporters':
@@ -881,14 +912,8 @@ class ScssLintRun extends BaseTask implements
 
     protected function runReturn(): Result
     {
-        $exitCode = $this->reportWrapper ?
-            $this->getTaskExitCode(
-                $this->reportWrapper->numOfErrors(),
-                $this->reportWrapper->numOfWarnings()
-            )
-            : $this->lintExitCode;
-
         $this->assets['report'] = $this->reportWrapper;
+        $exitCode = $this->getTaskExitCode();
 
         return new Result(
             $this,
@@ -1176,10 +1201,22 @@ class ScssLintRun extends BaseTask implements
     /**
      * Get the exit code regarding the failOn settings.
      */
-    protected function getTaskExitCode(int $numOfErrors, int $numOfWarnings): int
+    protected function getTaskExitCode(): int
     {
-        if ($this->lintExitCode === static::EXIT_CODE_NO_FILES) {
-            return ($this->getFailOnNoFiles() ? static::EXIT_CODE_NO_FILES : static::EXIT_CODE_OK);
+        $exitCode = $this->lintExitCode;
+        if ($exitCode === static::EXIT_CODE_GLOB_DID_NOT_MATCH) {
+            return $this->getFailOnGlobDidNotMatch() ? $exitCode : static::EXIT_CODE_OK;
+        }
+
+        if ($exitCode === static::EXIT_CODE_FILE_NOT_FOUND) {
+            return $this->getFailOnFileNotFound() ? $exitCode : static::EXIT_CODE_OK;
+        }
+
+        $numOfErrors = $exitCode === 2 ? 1 : 0;
+        $numOfWarnings = $exitCode === 1 ? 1 : 0;
+        if ($this->reportWrapper) {
+            $numOfErrors = $this->reportWrapper->numOfErrors();
+            $numOfWarnings = $this->reportWrapper->numOfWarnings();
         }
 
         if ($this->isLintSuccess()) {
@@ -1204,11 +1241,7 @@ class ScssLintRun extends BaseTask implements
 
     protected function getExitMessage(int $exitCode): ?string
     {
-        if (isset($this->exitMessages[$exitCode])) {
-            return $this->exitMessages[$exitCode];
-        }
-
-        return null;
+        return $this->exitMessages[$exitCode] ?? null;
     }
 
     /**
@@ -1228,7 +1261,8 @@ class ScssLintRun extends BaseTask implements
     {
         return [
             static::EXIT_CODE_OK,
-            static::EXIT_CODE_NO_FILES,
+            static::EXIT_CODE_FILE_NOT_FOUND,
+            static::EXIT_CODE_GLOB_DID_NOT_MATCH,
             static::EXIT_CODE_WARNING,
             static::EXIT_CODE_ERROR,
         ];

@@ -3,6 +3,7 @@
 namespace Sweetchuck\Robo\ScssLint\Tests\Unit\Task;
 
 use Sweetchuck\LintReport\Reporter\VerboseReporter;
+use Sweetchuck\Robo\ScssLint\LintReportWrapper\ReportWrapper;
 use Sweetchuck\Robo\ScssLint\Task\ScssLintRunFiles as Task;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
@@ -80,9 +81,28 @@ class ScssLintRunFilesTest extends Unit
                 "my\\\$ruby bundle exec scss-lint",
                 ['rubyExecutable' => 'my$ruby'],
             ],
-            'bundle-gem-file' => [
+            'env-var-path vector' => [
+                "PATH='/a/b/c:/d/e' bundle exec scss-lint",
+                [
+                    'envVarPath' => [
+                        '/a/b/c',
+                        '/d/e'
+                    ],
+                ],
+            ],
+            'env-var-path assoc' => [
+                "PATH='/a/b/c:/d/e' bundle exec scss-lint",
+                [
+                    'envVarPath' => [
+                        '/a/b/c' => true,
+                        '/d/e' => true,
+                        '/f/g' => false,
+                    ],
+                ],
+            ],
+            'env-var-bundle-gem-file' => [
                 "BUNDLE_GEMFILE='a/b/Gemfile' bundle exec scss-lint",
-                ['bundleGemFile' => 'a/b/Gemfile'],
+                ['envVarBundleGemFile' => 'a/b/Gemfile'],
             ],
             'bundleExecutable-empty' => [
                 'scss-lint',
@@ -93,10 +113,11 @@ class ScssLintRunFilesTest extends Unit
                 ['bundleExecutable' => 'my-bundle'],
             ],
             'complex-executable' => [
-                "cd 'my-dir' && BUNDLE_GEMFILE='my-gem-file' my-ruby my-bundle exec scss-lint",
+                "cd 'my-dir' && PATH='/a:/b' BUNDLE_GEMFILE='my-gem-file' my-ruby my-bundle exec scss-lint",
                 [
                     'workingDirectory' => 'my-dir',
-                    'bundleGemFile' => 'my-gem-file',
+                    'envVarPath' => ['/a', '/b'],
+                    'envVarBundleGemFile' => 'my-gem-file',
                     'rubyExecutable' => 'my-ruby',
                     'bundleExecutable' => 'my-bundle',
                 ],
@@ -231,7 +252,8 @@ class ScssLintRunFilesTest extends Unit
         $this->tester->assertEquals(0, Task::EXIT_CODE_OK);
         $this->tester->assertEquals(1, Task::EXIT_CODE_WARNING);
         $this->tester->assertEquals(2, Task::EXIT_CODE_ERROR);
-        $this->tester->assertEquals(80, Task::EXIT_CODE_NO_FILES);
+        $this->tester->assertEquals(66, Task::EXIT_CODE_FILE_NOT_FOUND);
+        $this->tester->assertEquals(80, Task::EXIT_CODE_GLOB_DID_NOT_MATCH);
     }
 
     public function casesGetTaskExitCode(): array
@@ -239,79 +261,81 @@ class ScssLintRunFilesTest extends Unit
         $o = Task::EXIT_CODE_OK;
         $w = Task::EXIT_CODE_WARNING;
         $e = Task::EXIT_CODE_ERROR;
-        $n = Task::EXIT_CODE_NO_FILES;
+        $n = Task::EXIT_CODE_FILE_NOT_FOUND;
+        $g = Task::EXIT_CODE_GLOB_DID_NOT_MATCH;
         $u = 5;
 
-        return [
-            'never-n00n' => [$n, 'never', 1, 0, 0, $n],
-            'never-n005' => [$u, 'never', 1, 0, 0, $u],
-
-            'warning-n00n' => [$n, 'warning', 1, 0, 0, $n],
-            'warning-n005' => [$u, 'warning', 1, 0, 0, $u],
-
-            'error-n00n' => [$n, 'error', 1, 0, 0, $n],
-            'error-n005' => [$u, 'error', 1, 0, 0, $u],
-
-            'never-000' => [$o, 'never', 0, 0, 0, 0],
-            'never-001' => [$o, 'never', 0, 0, 0, 1],
-            'never-002' => [$o, 'never', 0, 0, 0, 2],
-            'never-005' => [$u, 'never', 0, 0, 0, 5],
-
-            'never-010' => [$o, 'never', 0, 0, 1, 0],
-            'never-011' => [$o, 'never', 0, 0, 1, 1],
-            'never-012' => [$o, 'never', 0, 0, 1, 2],
-            'never-015' => [$u, 'never', 0, 0, 1, 5],
-
-            'never-100' => [$o, 'never', 0, 1, 0, 0],
-            'never-101' => [$o, 'never', 0, 1, 0, 1],
-            'never-102' => [$o, 'never', 0, 1, 0, 2],
-            'never-105' => [$u, 'never', 0, 1, 0, 5],
-
-            'never-110' => [$o, 'never', 0, 1, 1, 0],
-            'never-111' => [$o, 'never', 0, 1, 1, 1],
-            'never-112' => [$o, 'never', 0, 1, 1, 2],
-            'never-115' => [$u, 'never', 0, 1, 1, 5],
-
-            'warning-000' => [$o, 'warning', 0, 0, 0, 0],
-            'warning-001' => [$o, 'warning', 0, 0, 0, 1],
-            'warning-002' => [$o, 'warning', 0, 0, 0, 2],
-            'warning-005' => [$u, 'warning', 0, 0, 0, 5],
-
-            'warning-010' => [$w, 'warning', 0, 0, 1, 0],
-            'warning-011' => [$w, 'warning', 0, 0, 1, 1],
-            'warning-012' => [$w, 'warning', 0, 0, 1, 2],
-            'warning-015' => [$u, 'warning', 0, 0, 1, 5],
-
-            'warning-100' => [$e, 'warning', 0, 1, 0, 0],
-            'warning-101' => [$e, 'warning', 0, 1, 0, 1],
-            'warning-102' => [$e, 'warning', 0, 1, 0, 2],
-            'warning-105' => [$u, 'warning', 0, 1, 0, 5],
-
-            'warning-110' => [$e, 'warning', 0, 1, 1, 0],
-            'warning-111' => [$e, 'warning', 0, 1, 1, 1],
-            'warning-112' => [$e, 'warning', 0, 1, 1, 2],
-            'warning-115' => [$u, 'warning', 0, 1, 1, 5],
-
-            'error-000' => [$o, 'error', 0, 0, 0, 0],
-            'error-001' => [$o, 'error', 0, 0, 0, 1],
-            'error-002' => [$o, 'error', 0, 0, 0, 2],
-            'error-005' => [$u, 'error', 0, 0, 0, 5],
-
-            'error-010' => [$o, 'error', 0, 0, 1, 0],
-            'error-011' => [$o, 'error', 0, 0, 1, 1],
-            'error-012' => [$o, 'error', 0, 0, 1, 2],
-            'error-015' => [$u, 'error', 0, 0, 1, 5],
-
-            'error-100' => [$e, 'error', 0, 1, 0, 0],
-            'error-101' => [$e, 'error', 0, 1, 0, 1],
-            'error-102' => [$e, 'error', 0, 1, 0, 2],
-            'error-105' => [$u, 'error', 0, 1, 0, 5],
-
-            'error-110' => [$e, 'error', 0, 1, 1, 0],
-            'error-111' => [$e, 'error', 0, 1, 1, 1],
-            'error-112' => [$e, 'error', 0, 1, 1, 2],
-            'error-115' => [$u, 'error', 0, 1, 1, 5],
+        $variations = [
+            [$o, 'n', 1, 1, 0, 0, $o],
+            [$n, 'n', 1, 1, 0, 0, $n],
+            [$g, 'n', 1, 1, 0, 0, $g],
+            [$u, 'n', 1, 1, 0, 0, $u],
+            [$o, 'n', 0, 1, 0, 0, $n],
+            [$o, 'n', 1, 0, 0, 0, $g],
+            [$n, 'w', 1, 1, 0, 0, $n],
+            [$u, 'w', 1, 1, 0, 0, $u],
+            [$g, 'w', 1, 1, 0, 0, $g],
+            [$n, 'e', 1, 1, 0, 0, $n],
+            [$u, 'e', 1, 1, 0, 0, $u],
+            [$g, 'e', 1, 1, 0, 0, $g],
+            [$o, 'n', 0, 0, 0, 0, $o],
+            [$o, 'n', 0, 0, 0, 0, $w],
+            [$o, 'n', 0, 0, 0, 0, $e],
+            [$u, 'n', 0, 0, 0, 0, $u],
+            [$o, 'n', 0, 0, 0, 1, $o],
+            [$o, 'n', 0, 0, 0, 1, $w],
+            [$o, 'n', 0, 0, 0, 1, $e],
+            [$u, 'n', 0, 0, 0, 1, $u],
+            [$o, 'n', 0, 0, 1, 0, $o],
+            [$o, 'n', 0, 0, 1, 0, $w],
+            [$o, 'n', 0, 0, 1, 0, $e],
+            [$u, 'n', 0, 0, 1, 0, $u],
+            [$o, 'n', 0, 0, 1, 1, $o],
+            [$o, 'n', 0, 0, 1, 1, $w],
+            [$o, 'n', 0, 0, 1, 1, $e],
+            [$u, 'n', 0, 0, 1, 1, $u],
+            [$o, 'w', 0, 0, 0, 0, $o],
+            [$o, 'w', 0, 0, 0, 0, $w],
+            [$o, 'w', 0, 0, 0, 0, $e],
+            [$u, 'w', 0, 0, 0, 0, $u],
+            [$w, 'w', 0, 0, 0, 1, $o],
+            [$w, 'w', 0, 0, 0, 1, $w],
+            [$w, 'w', 0, 0, 0, 1, $e],
+            [$u, 'w', 0, 0, 0, 1, $u],
+            [$e, 'w', 0, 0, 1, 0, $o],
+            [$e, 'w', 0, 0, 1, 0, $w],
+            [$e, 'w', 0, 0, 1, 0, $e],
+            [$u, 'w', 0, 0, 1, 0, $u],
+            [$e, 'w', 0, 0, 1, 1, $o],
+            [$e, 'w', 0, 0, 1, 1, $w],
+            [$e, 'w', 0, 0, 1, 1, $e],
+            [$u, 'w', 0, 0, 1, 1, $u],
+            [$o, 'e', 0, 0, 0, 0, $o],
+            [$o, 'e', 0, 0, 0, 0, $w],
+            [$o, 'e', 0, 0, 0, 0, $e],
+            [$u, 'e', 0, 0, 0, 0, $u],
+            [$o, 'e', 0, 0, 0, 1, $o],
+            [$o, 'e', 0, 0, 0, 1, $w],
+            [$o, 'e', 0, 0, 0, 1, $e],
+            [$u, 'e', 0, 0, 0, 1, $u],
+            [$e, 'e', 0, 0, 1, 0, $o],
+            [$e, 'e', 0, 0, 1, 0, $w],
+            [$e, 'e', 0, 0, 1, 0, $e],
+            [$u, 'e', 0, 0, 1, 0, $u],
+            [$e, 'e', 0, 0, 1, 1, $o],
+            [$e, 'e', 0, 0, 1, 1, $w],
+            [$e, 'e', 0, 0, 1, 1, $e],
+            [$u, 'e', 0, 0, 1, 1, $u],
         ];
+
+        $cases = [];
+        foreach ($variations as $variation) {
+            $id = implode(', ', array_slice($variation, 1));
+            $variation[1] = $this->expandFailOnAbbreviation($variation[1]);
+            $cases[$id] = $variation;
+        }
+
+        return $cases;
     }
 
     /**
@@ -320,23 +344,29 @@ class ScssLintRunFilesTest extends Unit
     public function testGetTaskExitCode(
         int $expected,
         string $failOn,
-        bool $failOnNoFiles,
+        bool $failOnFileNotFound,
+        bool $failOnGlobDidNotMatch,
         int $numOfErrors,
         int $numOfWarnings,
         int $lintExitCode
     ): void {
-        $options = [
-            'failOn' => $failOn,
-            'failOnNoFiles' => $failOnNoFiles,
-        ];
-
         /** @var Task $task */
-        $task = Stub::construct(Task::class, [], ['lintExitCode' => $lintExitCode]);
-        $task->setOptions($options);
+        $task = Stub::construct(
+            Task::class,
+            [],
+            [
+                'lintExitCode' => $lintExitCode,
+                'reportWrapper' => $this->createReportWrapper($numOfErrors, $numOfWarnings),
+            ]
+        );
+        $task
+            ->setFailOn($failOn)
+            ->setFailOnFileNotFound($failOnFileNotFound)
+            ->setFailOnGlobDidNotMatch($failOnGlobDidNotMatch);
 
         $this->tester->assertEquals(
             $expected,
-            static::getMethod('getTaskExitCode')->invokeArgs($task, [$numOfErrors, $numOfWarnings])
+            static::getMethod('getTaskExitCode')->invoke($task, $numOfErrors, $numOfWarnings)
         );
     }
 
@@ -429,7 +459,7 @@ class ScssLintRunFilesTest extends Unit
             'workingDirectory' => 'my-working-dir',
             'format' => 'JSON',
             'failOn' => 'warning',
-            'failOnNoFiles' => false,
+            'failOnGlobDidNotMatch' => false,
         ];
 
         /** @var \Sweetchuck\Robo\ScssLint\Task\ScssLintRun $task */
@@ -509,5 +539,42 @@ class ScssLintRunFilesTest extends Unit
             'Extra lint reporters can be used only if the output format is "JSON".',
             $result->getMessage()
         );
+    }
+
+    protected function createReportWrapper(int $numOfErrors, int $numOfWarnings): ReportWrapper
+    {
+        return new ReportWrapper($this->createReport($numOfErrors, $numOfWarnings));
+    }
+
+    protected function createReport(int $numOfErrors, int $numOfWarnings): array
+    {
+        $report = [
+            'a.scss' => [],
+        ];
+        foreach (['error' => $numOfErrors, 'warning' => $numOfWarnings] as $severity => $numOfIssue) {
+            for ($i = 0; $i < $numOfIssue; $i++) {
+                $report['a.scss'][] = [
+                    'severity' => $severity,
+                ];
+            }
+        }
+
+        return $report;
+    }
+
+    protected function expandFailOnAbbreviation(string $abbreviation): string
+    {
+        switch ($abbreviation) {
+            case 'n':
+                return 'never';
+
+            case 'w':
+                return 'warning';
+
+            case 'e':
+                return 'error';
+        }
+
+        throw new \InvalidArgumentException();
     }
 }
